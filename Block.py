@@ -28,14 +28,14 @@ blocks = [T, Z, S, I, L, J, O]
 colors = [(255, 0, 0), (30, 144, 255), (255, 255, 0), (46, 139, 87), (160, 32, 240), (255, 165, 0), (255, 105, 180)]
 
 # Define the game board
-cell_size = 20
+cell_size = 25
 columns = 10
 rows = 25
 line = 1
 board_width = columns * (cell_size + line) + line
 board_height = rows * (cell_size + line) + line
 screen_width = 500
-screen_height = 700
+screen_height = 750
 board_start_x = (screen_width - board_width) // 2
 board_start_y = screen_height - board_height
 fps = 60
@@ -47,28 +47,35 @@ def get_board():
     return board
 
 
-def display_screen(screen):
-    screen.fill((252, 230, 201))
-    for x in range(columns):
-        pygame.draw.line(screen, (0, 0, 0), (x * cell_size, 0), (x * cell_size, board_height))
-    for y in range(rows):
-        pygame.draw.line(screen, (0, 0, 0), (0, y * cell_size))
-    pygame.font.init()
-    font1 = pygame.font.SysFont('arial', 60)
-    font2 = pygame.font.SysFont('arial', 72) # bigger font for "GAME OVER"
-
-
 def game_text(screen, font, x, y, text, color):
     text = font.render('AI Tetris', 1, (139, 28, 98))
     screen.blit(text, (x, y))
 
 
+def display_screen(screen):
+    screen.fill((252, 230, 201))
+    pygame.draw.rect(screen, (255, 250, 250),pygame.Rect(50, 50, board_width, board_height))
+    for x in range(columns + 1):
+        pygame.draw.line(screen, (0, 0, 0), (50 + x * (cell_size + line), 50), (50 + x * (cell_size + line), board_height + 49))
+    for y in range(rows + 1):
+        pygame.draw.line(screen, (0, 0, 0), (50, y * (cell_size + line) + 50), (board_width + 49, y * (cell_size + line) + 50))
+    pygame.font.init()
+    font1 = pygame.font.SysFont('arial', 60)
+    font2 = pygame.font.SysFont('arial', 72) # bigger font for "GAME OVER"
+
 
 def main():
     # Initialize the screen
     pygame.init()
-    screen = pygame.display.set_mode((screen_height, screen_width))
-    pygame.display.set_caption('Happy Tetris')
+    screen = pygame.display.set_mode((screen_width, screen_height))
+    pygame.display.set_caption('Happy AI Tetris')
+    display_screen(screen)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+        pygame.display.update()
 
 
 class Blocks(object):
@@ -108,7 +115,11 @@ class game_block():
     def falling(self):
         self.cur_block.move(0, 1)
 
-    def draw_block(self):
+    # def draw_block(self):
+
+
+
+main()
 
 
 
@@ -116,12 +127,4 @@ class game_block():
 
 
 
-
-
-
-
-A = Blocks(1, 2, T, colors)
-B = A.shape
-C = A.rotation(T)
-print(C)
 
