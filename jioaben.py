@@ -191,6 +191,11 @@ def run():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+            if event.type == KEYDOWN:
+                if event.key == K_LEFT: main_panel.control_block(-1, 0)
+                if event.key == K_RIGHT: main_panel.control_block(1, 0)
+                if event.key == K_UP: pass  # 变形过会实现
+                if event.key == K_DOWN: main_panel.control_block(0, 1)
 
         screen.fill((100, 100, 100))  # 将界面设置为灰色
         main_panel.paint()  # 主面盘绘制

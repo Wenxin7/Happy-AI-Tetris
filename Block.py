@@ -12,7 +12,7 @@ T = [[(-1, -3), (0, -3), (1, -3), (0, -4)],
 Z = [[(-1, -4), (0, -4), (0, -3), (1, -3)],
      [(0, -4), (0, -3), (-1, -3), (-1, -2)]]
 S = [[(1, -4), (0, -4), (0, -3), (-1, -3)],
-     [(1, -2), (1, -3), (0, -2), (0, -4)]]
+     [(1, -2), (1, -3), (0, -3), (0, -4)]]
 I = [[(0, -4), (0, -3), (0, -2), (0, -1)],
      [(-1, -3), (0, -3), (1, -3), (2, -3)]]
 L = [[(0, -5), (0, -4), (0, -3), (1, -3)],
@@ -44,12 +44,6 @@ board_start_y = screen_height - board_height
 fps = 60
 
 
-
-def get_board():
-    board = [[0 for x in range(10)] for x in range(25)]
-    return board
-
-
 def game_text(screen, font, x, y, text, color):
     text = font.render('AI Tetris', 1, (139, 28, 98))
     screen.blit(text, (x, y))
@@ -70,27 +64,46 @@ def display_screen(screen):
 def creat_block():
     block_shape = random.choice(blocks)
     block = block_shape[0]
-    return block, block_shape
+    block_id = block_shape.index(block)
+    return block, block_shape, block_id
 
 
 class Blocks(object):
-    def __init__(self, block, block_shape):
+    def __init__(self, block, block_shape,  block_id):
         self.color_ind = random.choice(len(colors))
         self.color = colors[self.color_ind]
         self.block_shape = block_shape
         self.block = block
+        self.block_id = block_id
 
     def __call__(self):
         return self.block
 
     def rotation(self):
-        index = self.block.index
-        block = self.block_shape[index + 1]
-        return block
+        index = self.block_id
+        # Record the movement of the block and apply the same movement to the block after rotation
+        del_x = self.block[0][0] - self.block_shape[index][0][0]
+        del_y = self.block[0][1] - self.block_shape[index][0][1]
+        print(del_x,del_y)
+        if index + 1 <= len(self.block_shape) - 1:
+            print(self.block_shape)
+            new_block = self.block_shape[index + 1]
+            for sq in new_block:
+                sq = (sq[0] + del_x, sq[1] + del_y)
+            self.block = new_block
+            self.block_id = index + 1
+        else:
+            new_block = self.block_shape[0]
+            for sq in new_block:
+                new_block.remove(sq)
+                new_block.append((sq[0] + del_x, sq[1] + del_y))
+            self.block = new_block
+            self.block_id = 0
+        return self.block
 
-    def chk_fall(self, del_x, del_y):
+    def chk_move(self, del_x, del_y):
         for sq in self.block:
-            if sq[1] + del_y > 22:
+            if sq[1] + del_y > 22 or sq[0] + del_x < -4 or sq[0] + del_x > 5:
                 return False
         return True
 
@@ -116,25 +129,31 @@ class Blocks(object):
             self.block = new_block
         return self.block
 
-    done_area = [] #fallen blocks
-    cur_block = None # falling block
+    done_area = []  # fallen blocks
+    cur_block = None  # falling block
     ex_color = []
 
     def creat_new_block(self):
         new_block = creat_block()[0]
         self.block = new_block
+        new_shape = creat_block()[1]
+        self.block_shape = new_shape
+        # get the initial index of every new blocks for further block rotation function
+        self.block_id = self.block_shape.index(self.block)
         new_color_ind = random.choice(len(colors))
         new_color = colors[new_color_ind]
         self.color = new_color
-        return self.block, self.color
+        return self.block, self.color, self.block_shape
 
     def falling(self):
-        if self.chk_fall(0, 1):
+        if self.chk_move(0, 1):
             if self.chk_overlap(0, 1):
                 self.move(0, 1)
             else:
                 '''
-                Check whether the current block 
+                First, check whether the current block will overlap with the block below 
+                If the block overlap with the block below, and this block is already out of the game board area,
+                the game will stop.
                 '''
                 if self.chk_over():
                     self.ex_color.append(self.color)
@@ -145,8 +164,10 @@ class Blocks(object):
             self.done_area.append(self.block)
             self.creat_new_block()
 
-    # def key_control(self, del_x, del_y):
-
+    def key_control(self, del_x, del_y):
+        if self.chk_move(del_x, del_y):
+            if self.chk_overlap(del_x, del_y):
+                self.move(del_x, del_y)
 
     def draw_block(self, cell_size, line, screen):
         if self.falling:
@@ -154,7 +175,7 @@ class Blocks(object):
                 line_corn1 = (50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
                 line_corn2 = (50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
                 line_corn3 = (50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
-                line_corn4 = (50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
+                line_corn4 = (50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
                 corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
                 pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
                 pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
@@ -182,14 +203,24 @@ def main():
     pygame.display.set_caption('Happy AI Tetris')
     block = creat_block()[0]
     block_shape = creat_block()[1]
-    screen_block = Blocks(block, block_shape)
-    move_time = 100
+    block_id = creat_block()[2]
+    screen_block = Blocks(block, block_shape, block_id)
+    move_time = 700
     time = pygame.time.get_ticks() + move_time
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == K_LEFT:
+                    screen_block.key_control(-1, 0)
+                elif event.key == K_RIGHT:
+                    screen_block.key_control(1, 0)
+                elif event.key == K_DOWN:
+                    screen_block.key_control(0, 1)
+                elif event.key == K_UP:
+                    screen_block.rotation()
         display_screen(screen)
         screen_block.draw_block(cell_size, line, screen)
         pygame.display.update()
