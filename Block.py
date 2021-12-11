@@ -16,13 +16,13 @@ S = [[(1, -4), (0, -4), (0, -3), (-1, -3)],
 I = [[(0, -4), (0, -3), (0, -2), (0, -1)],
      [(-1, -3), (0, -3), (1, -3), (2, -3)]]
 L = [[(0, -5), (0, -4), (0, -3), (1, -3)],
-     [(2, 0), (1, 0), (0, 0), (0, 1)],
-     [(0, 2), (0, 1), (0, 0), (-1, 0)],
-     [(-2, 0), (-1, 0), (0, 0), (0, -1)]]
+     [(2, -3), (1, -3), (0, -3), (0, -2)],
+     [(0, -1), (0, -2), (0, -3), (-1, -3)],
+     [(-2, -3), (-1, -3), (0, -3), (0, -4)]]
 J = [[(0, -5), (0, -4), (0, -3), (-1, -3)],
-     [(2, 0), (1, 0), (0, 0), (0, -1)],
-     [(0, 2), (0, 1), (0, 0), (1, 0)],
-     [(-2, 0), (-1, 0), (0, 0), (0, 1)]]
+     [(2, -3), (1, -3), (0, -3), (0, -4)],
+     [(0, -1), (0, -2), (0, -3), (1, -3)],
+     [(-2, -3), (-1, -3), (0, -3), (0, -2)]]
 O = [[(-1, -4), (-1, -3), (0, -4), (0, -3)]]
 
 blocks = [T, Z, S, I, L, J, O]
@@ -101,8 +101,11 @@ class Blocks(object):
                     return False
         return True
 
-    # def chk_over(self):
-
+    def chk_over(self):
+        for sq in self.block:
+            if sq[1] <= -2:
+                return False
+        return True
 
     def move(self, del_x, del_y):
         new_block = []
@@ -130,9 +133,13 @@ class Blocks(object):
             if self.chk_overlap(0, 1):
                 self.move(0, 1)
             else:
-                self.ex_color.append(self.color)
-                self.done_area.append(self.block)
-                self.creat_new_block()
+                '''
+                Check whether the current block 
+                '''
+                if self.chk_over():
+                    self.ex_color.append(self.color)
+                    self.done_area.append(self.block)
+                    self.creat_new_block()
         else:
             self.ex_color.append(self.color)
             self.done_area.append(self.block)
