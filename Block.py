@@ -1,30 +1,29 @@
 # Block
 import random
-from random import randrange
 import pygame
-import numpy as np
 from numpy import *
+from pygame.locals import KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN
 
 # Define block shapes
-T = [[(-1, 0), (0, 0), (1, 0), (0, -1)],
-           [(0, -1), (0, 0), (1, 0), (0, 1)],
-           [(-1, 0), (0, 0), (1, 0), (0, 1)],
-           [(0, -1), (0, 0), (-1, 0), (0, 1)]]
-Z = [[(-1, -1), (0, -1), (0, 0), (1, 0)],
-           [(0, -1), (0, 0), (-1, 0), (-1, 1)]]
-S = [[(1, 1), (0, -1), (0, 0), (-1, 0)],
-           [(-1, -1), (-1, 0), (0, 0), (0, 1)]]
-I = [[(0, -1), (0, 0), (0, 1), (0, 2)],
-          [(-1, 0), (0, 0), (1, 0), (2, 0)]]
-L = [[(0, -2), (0, -1), (0, 0), (1, 0)],
-           [(2, 0), (1, 0), (0, 0), (0, 1)],
-           [(0, 2), (0, 1), (0, 0), (-1, 0)],
-           [(-2, 0), (-1, 0), (0, 0), (0, -1)]]
-J = [[(0, -2), (0, -1), (0, 0), (-1, 0)],
-           [(2, 0), (1, 0), (0, 0), (0, -1)],
-           [(0, 2), (0, 1), (0, 0), (1, 0)],
-           [(-2, 0), (-1, 0), (0, 0), (0, 1)]]
-O = [[(-1, -1), (-1, 0), (0, -1), (0, 0)]]
+T = [[(-1, -3), (0, -3), (1, -3), (0, -4)],
+     [(0, -4), (0, -3), (1, -3), (0, -2)],
+     [(-1, -3), (0, -3), (1, -3), (0, -2)],
+     [(0, -4), (0, -3), (-1, -3), (0, -2)]]
+Z = [[(-1, -4), (0, -4), (0, -3), (1, -3)],
+     [(0, -4), (0, -3), (-1, -3), (-1, -2)]]
+S = [[(1, -4), (0, -4), (0, -3), (-1, -3)],
+     [(1, -2), (1, -3), (0, -2), (0, -4)]]
+I = [[(0, -4), (0, -3), (0, -2), (0, -1)],
+     [(-1, -3), (0, -3), (1, -3), (2, -3)]]
+L = [[(0, -5), (0, -4), (0, -3), (1, -3)],
+     [(2, 0), (1, 0), (0, 0), (0, 1)],
+     [(0, 2), (0, 1), (0, 0), (-1, 0)],
+     [(-2, 0), (-1, 0), (0, 0), (0, -1)]]
+J = [[(0, -5), (0, -4), (0, -3), (-1, -3)],
+     [(2, 0), (1, 0), (0, 0), (0, -1)],
+     [(0, 2), (0, 1), (0, 0), (1, 0)],
+     [(-2, 0), (-1, 0), (0, 0), (0, 1)]]
+O = [[(-1, -4), (-1, -3), (0, -4), (0, -3)]]
 
 blocks = [T, Z, S, I, L, J, O]
 
@@ -39,7 +38,7 @@ line = 1
 board_width = columns * (cell_size + line) + line
 board_height = rows * (cell_size + line) + line
 screen_width = 500
-screen_height = 750
+screen_height = 800
 board_start_x = (screen_width - board_width) // 2
 board_start_y = screen_height - board_height
 fps = 60
@@ -58,14 +57,115 @@ def game_text(screen, font, x, y, text, color):
 
 def display_screen(screen):
     screen.fill((252, 230, 201))
-    pygame.draw.rect(screen, (255, 250, 250),pygame.Rect(50, 50, board_width, board_height))
+    pygame.draw.rect(screen, (255, 250, 250),pygame.Rect(50, 100, board_width, board_height))
     for x in range(columns + 1):
-        pygame.draw.line(screen, (0, 0, 0), (50 + x * (cell_size + line), 50), (50 + x * (cell_size + line), board_height + 49))
+        pygame.draw.line(screen, (0, 0, 0), (50 + x * (cell_size + line), 100), (50 + x * (cell_size + line), board_height + 99))
     for y in range(rows + 1):
-        pygame.draw.line(screen, (0, 0, 0), (50, y * (cell_size + line) + 50), (board_width + 49, y * (cell_size + line) + 50))
+        pygame.draw.line(screen, (0, 0, 0), (50, y * (cell_size + line) + 100), (board_width + 49, y * (cell_size + line) + 100))
     pygame.font.init()
     font1 = pygame.font.SysFont('arial', 60)
-    font2 = pygame.font.SysFont('arial', 72) # bigger font for "GAME OVER"
+    font2 = pygame.font.SysFont('arial', 72)  # bigger font for "GAME OVER"
+
+
+def creat_block():
+    block_shape = random.choice(blocks)
+    block = block_shape[0]
+    return block, block_shape
+
+
+class Blocks(object):
+    def __init__(self, block, block_shape):
+        self.color_ind = random.choice(len(colors))
+        self.color = colors[self.color_ind]
+        self.block_shape = block_shape
+        self.block = block
+
+    def __call__(self):
+        return self.block
+
+    def rotation(self):
+        index = self.block.index
+        block = self.block_shape[index + 1]
+        return block
+
+    def chk_fall(self, del_x, del_y):
+        for sq in self.block:
+            if sq[1] + del_y > 22:
+                return False
+        return True
+
+    def chk_overlap(self, del_x, del_y):
+        for sq in self.block:
+            for done in self.done_area:
+                if (sq[0] + del_x, sq[1] + del_y) in done:
+                    return False
+        return True
+
+    # def chk_over(self):
+
+
+    def move(self, del_x, del_y):
+        new_block = []
+        for pos in self.block:
+            new_x = pos[0] + del_x
+            new_y = pos[1] + del_y
+            new_block.append((new_x, new_y))
+            self.block = new_block
+        return self.block
+
+    done_area = [] #fallen blocks
+    cur_block = None # falling block
+    ex_color = []
+
+    def creat_new_block(self):
+        new_block = creat_block()[0]
+        self.block = new_block
+        new_color_ind = random.choice(len(colors))
+        new_color = colors[new_color_ind]
+        self.color = new_color
+        return self.block, self.color
+
+    def falling(self):
+        if self.chk_fall(0, 1):
+            if self.chk_overlap(0, 1):
+                self.move(0, 1)
+            else:
+                self.ex_color.append(self.color)
+                self.done_area.append(self.block)
+                self.creat_new_block()
+        else:
+            self.ex_color.append(self.color)
+            self.done_area.append(self.block)
+            self.creat_new_block()
+
+    # def key_control(self, del_x, del_y):
+
+
+    def draw_block(self, cell_size, line, screen):
+        if self.falling:
+            for sq in self.block:
+                line_corn1 = (50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
+                line_corn2 = (50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
+                line_corn3 = (50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
+                line_corn4 = (50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
+                corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
+                pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
+                pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
+                pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
+                pygame.draw.line(screen, (0, 0, 0), line_corn4, line_corn1)
+                pygame.draw.rect(screen, self.color, pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
+        for sq in self.done_area:
+            for pot in sq:
+                line_corn1 = (50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
+                line_corn2 = (50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
+                line_corn3 = (50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 3) * (cell_size + line))
+                line_corn4 = (50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
+                corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
+                pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
+                pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
+                pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
+                pygame.draw.line(screen, (0, 0, 0), line_corn4, line_corn1)
+                pygame.draw.rect(screen, self.ex_color[self.done_area.index(sq)], pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
 
 
 def main():
@@ -73,59 +173,29 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption('Happy AI Tetris')
-    display_screen(screen)
+    block = creat_block()[0]
+    block_shape = creat_block()[1]
+    screen_block = Blocks(block, block_shape)
+    move_time = 100
+    time = pygame.time.get_ticks() + move_time
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+        display_screen(screen)
+        screen_block.draw_block(cell_size, line, screen)
         pygame.display.update()
-
-
-class Blocks(object):
-    def __init__(self, x, y, color):
-        self.x = x
-        self.y = y
-        self.color = color
-
-    def get_block(self):
-        block_shape = random.choice(blocks)
-        block = block_shape[0]
-        return block
-
-    def rotation(self, block):
-        block = np.rot90(block, -1)
-        return block
-
-    def move(self, x_move, y_move):
-        self.x = self.x + x_move
-        self.y = self.y + y_move
-
-
-class game_block():
-    done_area = [] #fallen blocks
-    cur_block = None # falling block
-
-    def __init__(self, screen, block_size, position, color):
-        self.screen = screen
-        self.x, self.y, self.width, self.height = position
-        self.block_size = block_size
-        self.screen_color = color
-
-    def creat_cur_block(self):
-        block = Blocks(board_width-len(shape[0]//2), 0, random.randint(0, 6))
-        cur_block = block.get_block()
-        self.cur_block = cur_block
-
-    def falling(self):
-        self.cur_block.move(0, 1)
-
-    # def draw_block(self):
+        if pygame.time.get_ticks() >= time:
+            time += move_time
+            screen_block.falling()
 
 
 
-A = Blocks(1, 2, colors[1])
-B = A.get_block()
+
+
+main()
+
 
 
 
