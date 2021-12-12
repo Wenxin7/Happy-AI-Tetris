@@ -97,34 +97,40 @@ def judging_centers():
     
         # get empty_holes
         empty_holes = 0
+        for j in range(screen_wide):
+            t = None
+            for i in range(screen_height):
+                if matrix_after[i][j] != None and t == None:
+                    t = 0
+                if matrix_after[i][j] == None and t != None:
+                    t += 1
+            if t != None:
+                empty_holes += t
+        centerlist.append(empty_holes)    # empty_holes 作为表中第八列
 
+        # get wells_number
+        wells_number = 0
+        wall_brick = 0
+        for i in range (screen_wide):
+            for j in range(screen_hight):
+                if matrix_after[j][i] == None:
+                    if (i == 0 or matrix_after[j][i-1] != None) and (i == screen_wide-1 or matrix_after[j][i+1] != None):
+                       wall_brick += 1
+                    else:
+                        wells_number += ((wall_brick +1)*wall_brick/2)
+                        wall_brick = 0
+        centerlist.append(wells_number)    # wells_number 作为表中第九列
 
+        # get whole point of each center position of a kind rotation
+        whole_point = -45*centerlist[3] + 34*centerlist[4] - 32*centerlist[5] - 98*centerlist[6] -79*centerlist[7] -34*centerlist[3]
+        centerlist.append(whole_point)    # whole_point 作为表中第十列
 
-
-
-        
-
-
-
-
-
-
-                    
-
-
-
-
-
-
+    # choose the optimal block with rotation and center:
+    largest_point_block = centerList[0]
+    for centerlist in centerList:
+        if centerlist[9] > largest_point_block[9]:
+            largest_point_block = centerlist
     
-
-
-    
-
-
-
-
-
-
+    return largest_point_block
 
 
