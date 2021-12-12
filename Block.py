@@ -1,10 +1,9 @@
-# Block
 import random
 import pygame
 from numpy import *
 from pygame.locals import KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN
 
-# Define block shapes
+# Define block shapes and shapes after rotation
 T = [[(-1, -3), (0, -3), (1, -3), (0, -4)],
      [(0, -4), (0, -3), (1, -3), (0, -2)],
      [(-1, -3), (0, -3), (1, -3), (0, -2)],
@@ -65,8 +64,6 @@ def creat_block():
     block_shape = random.choice(blocks)
     block = block_shape[0]
     block_id = block_shape.index(block)
-    print(block)
-    print(block_id)
     return block, block_shape, block_id
 
 
@@ -118,12 +115,12 @@ class Blocks(object):
 
     def chk_overlap(self, del_x, del_y):
         for sq in self.block:
-            for done in self.done_area:
-                if (sq[0] + del_x, sq[1] + del_y) in done:
-                    return False
+            if (sq[0] + del_x, sq[1] + del_y) in self.done_area:
+                return False
         return True
 
     def chk_over(self):
+        # check whether there are done blocks already in the top row
         for sq in self.block:
             if sq[1] <= -2:
                 return False
@@ -138,10 +135,10 @@ class Blocks(object):
             self.block = new_block
         return self.block
 
-
     done_area = []  # fallen blocks
     cur_block = None  # falling block
     ex_color = []
+    whole_cor = []
 
     def creat_new_block(self):
         new_Block = creat_block()
@@ -167,18 +164,53 @@ class Blocks(object):
                 the game will stop.
                 '''
                 if self.chk_over():
-                    self.ex_color.append(self.color)
-                    self.done_area.append(self.block)
+                    for bol in self.block:
+                        self.ex_color.append(self.color)
+                        self.done_area.append(bol)
+                    self.clear_row()
                     self.creat_new_block()
         else:
-            self.ex_color.append(self.color)
-            self.done_area.append(self.block)
+            for bol in self.block:
+                self.ex_color.append(self.color)
+                self.done_area.append(bol)
+            self.clear_row()
             self.creat_new_block()
 
     def key_control(self, del_x, del_y):
         if self.chk_move(del_x, del_y):
             if self.chk_overlap(del_x, del_y):
                 self.move(del_x, del_y)
+
+    def chk_clear(self, list1, list2):
+        for i in list1:
+            if i not in list2:
+                return False
+        return True
+
+    clear_num = 0
+
+    def clear_row(self):
+        for y in range(-2, 23):
+            row = []
+            for x in range(-4, 6):
+                row.append((x, y))
+            self.whole_cor.append(row)  # generate all the coordinate of points into the whole coordinate list
+            self.whole_cor.reverse()  # To make sure each row in this list is arranged from bottom to top
+        for row in self.whole_cor:
+            if self.chk_clear(row, self.done_area):
+                # record the row number of the row that will be cleared.
+                row_done = row[0][1]
+                for i in row:
+                    self.ex_color.remove(self.ex_color[self.done_area.index(i)])
+                    self.done_area.remove(i)
+                self.clear_num += 1
+                done_temp = []
+                for bl in self.done_area[:]:
+                    if bl[1] < row_done:
+                        done_temp.append((bl[0], bl[1] + 1))
+                        self.done_area.remove(bl)
+                for i in done_temp:
+                    self.done_area.append(i)
 
     def draw_block(self, cell_size, line, screen):
         if self.falling:
@@ -193,8 +225,7 @@ class Blocks(object):
                 pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
                 pygame.draw.line(screen, (0, 0, 0), line_corn4, line_corn1)
                 pygame.draw.rect(screen, self.color, pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
-        for sq in self.done_area:
-            for pot in sq:
+            for pot in self.done_area:
                 line_corn1 = (50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
                 line_corn2 = (50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
                 line_corn3 = (50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 3) * (cell_size + line))
@@ -204,7 +235,7 @@ class Blocks(object):
                 pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
                 pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
                 pygame.draw.line(screen, (0, 0, 0), line_corn4, line_corn1)
-                pygame.draw.rect(screen, self.ex_color[self.done_area.index(sq)], pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
+                pygame.draw.rect(screen, self.ex_color[self.done_area.index(pot)], pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
 
 
 def main():
