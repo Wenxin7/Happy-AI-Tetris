@@ -198,10 +198,12 @@ class Blocks(object):
             self.whole_cor.reverse()  # To make sure each row in this list is arranged from bottom to top
         for row in self.whole_cor:
             if self.chk_clear(row, self.done_area):
+                print(self.ex_color)
+                print(self.done_area)
                 # record the row number of the row that will be cleared.
                 row_done = row[0][1]
                 for i in row:
-                    self.ex_color.remove(self.ex_color[self.done_area.index(i)])
+                    self.ex_color.pop(self.done_area.index(i))
                     self.done_area.remove(i)
                 self.clear_num += 1
                 done_temp = []
