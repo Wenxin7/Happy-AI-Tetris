@@ -101,7 +101,7 @@ class Blocks(object):
                 ro_block.append((sq[0] + del_x, sq[1] + del_y))
             if self.chk_rotation(ro_block):
                 self.block = ro_block
-                self.block_id = index + 1
+                self.block_id = 0
         return self.block, self.block_id
 
     def chk_rotation(self, block):
