@@ -65,6 +65,8 @@ def creat_block():
     block_shape = random.choice(blocks)
     block = block_shape[0]
     block_id = block_shape.index(block)
+    print(block)
+    print(block_id)
     return block, block_shape, block_id
 
 
@@ -74,32 +76,39 @@ class Blocks(object):
         self.color = colors[self.color_ind]
         self.block_shape = block_shape
         self.block = block
+        # The initial index of every new-born block
         self.block_id = block_id
 
     def __call__(self):
         return self.block
 
     def rotation(self):
+        ro_block = []
         index = self.block_id
         # Record the movement of the block and apply the same movement to the block after rotation
         del_x = self.block[0][0] - self.block_shape[index][0][0]
         del_y = self.block[0][1] - self.block_shape[index][0][1]
-        print(del_x,del_y)
         if index + 1 <= len(self.block_shape) - 1:
-            print(self.block_shape)
             new_block = self.block_shape[index + 1]
             for sq in new_block:
-                sq = (sq[0] + del_x, sq[1] + del_y)
-            self.block = new_block
-            self.block_id = index + 1
+                ro_block.append((sq[0] + del_x, sq[1] + del_y))
+            if self.chk_rotation(ro_block):
+                self.block = ro_block
+                self.block_id = index + 1
         else:
             new_block = self.block_shape[0]
             for sq in new_block:
-                new_block.remove(sq)
-                new_block.append((sq[0] + del_x, sq[1] + del_y))
-            self.block = new_block
-            self.block_id = 0
-        return self.block
+                ro_block.append((sq[0] + del_x, sq[1] + del_y))
+            if self.chk_rotation(ro_block):
+                self.block = ro_block
+                self.block_id = index + 1
+        return self.block, self.block_id
+
+    def chk_rotation(self, block):
+        for sq in block:
+            if sq[0] < -4 or sq[0] > 5:
+                return False
+        return True
 
     def chk_move(self, del_x, del_y):
         for sq in self.block:
@@ -129,14 +138,16 @@ class Blocks(object):
             self.block = new_block
         return self.block
 
+
     done_area = []  # fallen blocks
     cur_block = None  # falling block
     ex_color = []
 
     def creat_new_block(self):
-        new_block = creat_block()[0]
+        new_Block = creat_block()
+        new_block = new_Block[0]
         self.block = new_block
-        new_shape = creat_block()[1]
+        new_shape = new_Block[1]
         self.block_shape = new_shape
         # get the initial index of every new blocks for further block rotation function
         self.block_id = self.block_shape.index(self.block)
@@ -201,11 +212,12 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption('Happy AI Tetris')
-    block = creat_block()[0]
-    block_shape = creat_block()[1]
-    block_id = creat_block()[2]
+    Block = creat_block()
+    block = Block[0]
+    block_shape = Block[1]
+    block_id = Block[2]
     screen_block = Blocks(block, block_shape, block_id)
-    move_time = 700
+    move_time = 300
     time = pygame.time.get_ticks() + move_time
     while True:
         for event in pygame.event.get():
