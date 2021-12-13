@@ -1,7 +1,7 @@
 import random
 import pygame
 from numpy import *
-from pygame.locals import KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN
+from pygame.locals import KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN, K_SPACE
 
 # Define block shapes and shapes after rotation
 T = [[(-1, -3), (0, -3), (1, -3), (0, -4)],
@@ -40,7 +40,7 @@ screen_width = 500
 screen_height = 800
 board_start_x = (screen_width - board_width) // 2
 board_start_y = screen_height - board_height
-fps = 60
+
 
 
 def game_text(screen, font, x, y, message, color):
@@ -56,8 +56,13 @@ def display_screen(screen):
     for y in range(rows + 1):
         pygame.draw.line(screen, (0, 0, 0), (50, y * (cell_size + line) + 100), (board_width + 49, y * (cell_size + line) + 100))
     pygame.font.init()
-    font1 = pygame.font.SysFont('arial', 60)
-    font2 = pygame.font.SysFont('arial', 72)  # bigger font for "GAME OVER"
+
+    font_1 = pygame.font.SysFont('Arial', 12)
+    font_width = int(font_1.size("Press SPACE to pause the game")[0])
+    font_height = int(font_1.size("Press SPACE to pause the game")[1])
+    pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(313, 595, font_width + 5, font_height + 5))
+    game_text(screen, font_1, 318, 600, "Press SPACE to pause the game", (160, 32, 240))
+
 
 
 def creat_block():
@@ -264,6 +269,7 @@ def main():
     move_time = 300
     time = pygame.time.get_ticks() + move_time
     game = 1
+    pause = False
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -271,27 +277,32 @@ def main():
                 exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == K_LEFT:
-                    if game == 1:
+                    if game == 1 and not pause:
                         screen_block.key_control(-1, 0)
                 elif event.key == K_RIGHT:
-                    if game == 1:
+                    if game == 1 and not pause:
                         screen_block.key_control(1, 0)
                 elif event.key == K_DOWN:
-                    if game == 1:
+                    if game == 1 and not pause:
                         screen_block.key_control(0, 1)
                 elif event.key == K_UP:
-                    if game == 1:
+                    if game == 1 and not pause:
                         screen_block.rotation()
+                elif event.key == K_SPACE:
+                    if game == 1:
+                        pause = not pause
         display_screen(screen)
         screen_block.draw_block(cell_size, line, screen)
         if game == 2:
             over_font = pygame.font.Font(None, 60)
             black = (0, 0, 0)
-            game_text(screen, over_font, 75, 250, "Game over", black)
+            game_text(screen, over_font, 75, 250, "Game Over", black)
         pygame.display.update()
-        if game == 1:
-            if pygame.time.get_ticks() >= time:
-                time += move_time
+        if pause:
+            time = pygame.time.get_ticks()
+        if pygame.time.get_ticks() >= time:
+            if game == 1 and not pause:
+                time = pygame.time.get_ticks() + move_time
                 game = screen_block.falling()
 
 
