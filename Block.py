@@ -62,6 +62,16 @@ def display_screen(screen):
     font_height = int(font_1.size("Press SPACE to pause the game")[1])
     pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(313, 595, font_width + 5, font_height + 5))
     game_text(screen, font_1, 318, 600, "Press SPACE to pause the game", (160, 32, 240))
+    bg_cor1 = (50 + 11 * (cell_size + line), 100)
+    bg_width = 5 * (cell_size + line) + line
+    bg_height = 2 * (cell_size + line) + line
+    pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1], bg_width, bg_height))
+    font_2 = pygame.font.SysFont('Arial', 20)
+    font_width = int(font_2.size("Next Block")[0])
+    font_height = int(font_2.size("Next Block")[1])
+    font_x = bg_cor1[0] + (bg_width - font_width)/2
+    font_y = bg_cor1[1] + (bg_height - font_height)/2
+    game_text(screen, font_2, font_x, font_y, "Next Block", (160, 32, 240))
 
 
 def creat_block():
@@ -159,15 +169,15 @@ class Blocks(object):
         return self.next_block, self.next_shape, self.next_block_id, self.next_color
 
     def draw_next(self, screen):
-        bg_cor1 = (50 + 11 * (cell_size + line), 100)
+        bg_cor1 = (50 + 11 * (cell_size + line), 175)
         bg_width = 5 * (cell_size + line) + line
-        bg_height = 6 * (cell_size + line) + line
+        bg_height = 7 * (cell_size + line) + line
         pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1], bg_width, bg_height))
         for sq in self.next_block:
-            line_corn1 = (50 + (sq[0] + 13) * (cell_size + line), 100 + (sq[1] + 6) * (cell_size + line))
-            line_corn2 = (50 + (sq[0] + 14) * (cell_size + line), 100 + (sq[1] + 6) * (cell_size + line))
-            line_corn3 = (50 + (sq[0] + 14) * (cell_size + line), 100 + (sq[1] + 7) * (cell_size + line))
-            line_corn4 = (50 + (sq[0] + 13) * (cell_size + line), 100 + (sq[1] + 7) * (cell_size + line))
+            line_corn1 = (50 + (sq[0] + 13) * (cell_size + line), 100 + (sq[1] + 9) * (cell_size + line))
+            line_corn2 = (50 + (sq[0] + 14) * (cell_size + line), 100 + (sq[1] + 9) * (cell_size + line))
+            line_corn3 = (50 + (sq[0] + 14) * (cell_size + line), 100 + (sq[1] + 10) * (cell_size + line))
+            line_corn4 = (50 + (sq[0] + 13) * (cell_size + line), 100 + (sq[1] + 10) * (cell_size + line))
             corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
             pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
             pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
@@ -256,6 +266,25 @@ class Blocks(object):
                 for i in done_temp:
                     self.done_area.append(i)
 
+    def draw_score(self, screen):
+        bg_cor1 = (50 + 11 * (cell_size + line), 400)
+        bg_width = 5 * (cell_size + line) + line
+        bg_height = 5 * (cell_size + line) + line
+        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1], bg_width, bg_height))
+        font_2 = pygame.font.SysFont('Arial', 20)
+        font_3 = pygame.font.SysFont('Cambria Math', 24)
+        font_width = int(font_2.size("Score")[0])
+        font_height = int(font_2.size("Score")[1])
+        font_x = bg_cor1[0] + (bg_width - font_width) / 2
+        font_y = bg_cor1[1] + 30
+        font_width_s = int(font_3.size('Score:%05d' % (self.clear_num * 100))[0])
+        font_height_s = int(font_3.size('Score:%05d' % (self.clear_num * 100))[1])
+        font_x_s = bg_cor1[0] + (bg_width - font_width_s) / 2
+        font_y_s = font_y + font_height_s + 25
+        game_text(screen, font_2, font_x, font_y, "Score", (160, 32, 240))
+        game_text(screen, font_3, font_x_s, font_y_s, 'Score:%05d' % (self.clear_num * 100), (178, 34, 34))
+
+
     def draw_block(self, cell_size, line, screen):
         if self.falling:
             for sq in self.block:
@@ -319,6 +348,7 @@ def main():
                     if game == 1:
                         pause = not pause
         display_screen(screen)
+        screen_block.draw_score(screen)
         screen_block.draw_block(cell_size, line, screen)
         screen_block.draw_next(screen)
         if game == 2:
