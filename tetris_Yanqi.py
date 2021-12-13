@@ -158,3 +158,4 @@ def judging_centers(done_area):
     return largest_point_block[0], largest_point_block[1], largest_point_block[2], (largest_point_block[2][0]-4, largest_point_block[2][1]-2)
 
 print(judging_centers(done_area))
+

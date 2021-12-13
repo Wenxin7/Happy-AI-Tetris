@@ -43,8 +43,8 @@ board_start_y = screen_height - board_height
 fps = 60
 
 
-def game_text(screen, font, x, y, text, color):
-    text = font.render('AI Tetris', 1, (139, 28, 98))
+def game_text(screen, font, x, y, message, color):
+    text = font.render(message, 1, color)
     screen.blit(text, (x, y))
 
 
@@ -157,6 +157,8 @@ class Blocks(object):
         if self.chk_move(0, 1):
             if self.chk_overlap(0, 1):
                 self.move(0, 1)
+                game = 1
+                return game
             else:
                 '''
                 First, check whether the current block will overlap with the block below 
@@ -169,12 +171,23 @@ class Blocks(object):
                         self.done_area.append(bol)
                     self.clear_row()
                     self.creat_new_block()
+                    game = 1
+                    return game
+                else:
+                    for bol in self.block:
+                        # Add the last block to done_area list
+                        self.ex_color.append(self.color)
+                        self.done_area.append(bol)
+                    game = 2
+                    return game
         else:
             for bol in self.block:
                 self.ex_color.append(self.color)
                 self.done_area.append(bol)
             self.clear_row()
             self.creat_new_block()
+            game = 1
+            return game
 
     def key_control(self, del_x, del_y):
         if self.chk_move(del_x, del_y):
@@ -250,6 +263,7 @@ def main():
     screen_block = Blocks(block, block_shape, block_id)
     move_time = 300
     time = pygame.time.get_ticks() + move_time
+    game = 1
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -257,19 +271,29 @@ def main():
                 exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == K_LEFT:
-                    screen_block.key_control(-1, 0)
+                    if game == 1:
+                        screen_block.key_control(-1, 0)
                 elif event.key == K_RIGHT:
-                    screen_block.key_control(1, 0)
+                    if game == 1:
+                        screen_block.key_control(1, 0)
                 elif event.key == K_DOWN:
-                    screen_block.key_control(0, 1)
+                    if game == 1:
+                        screen_block.key_control(0, 1)
                 elif event.key == K_UP:
-                    screen_block.rotation()
+                    if game == 1:
+                        screen_block.rotation()
         display_screen(screen)
         screen_block.draw_block(cell_size, line, screen)
+        if game == 2:
+            over_font = pygame.font.Font(None, 60)
+            black = (0, 0, 0)
+            game_text(screen, over_font, 75, 250, "Game over", black)
         pygame.display.update()
-        if pygame.time.get_ticks() >= time:
-            time += move_time
-            screen_block.falling()
+        if game == 1:
+            if pygame.time.get_ticks() >= time:
+                time += move_time
+                game = screen_block.falling()
+
 
 
 
