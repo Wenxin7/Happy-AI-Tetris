@@ -64,7 +64,6 @@ def display_screen(screen):
     game_text(screen, font_1, 318, 600, "Press SPACE to pause the game", (160, 32, 240))
 
 
-
 def creat_block():
     block_shape = random.choice(blocks)
     block = block_shape[0]
@@ -144,18 +143,45 @@ class Blocks(object):
     cur_block = None  # falling block
     ex_color = []
     whole_cor = []
+    NB = None
 
-    def creat_new_block(self):
-        new_Block = creat_block()
-        new_block = new_Block[0]
-        self.block = new_block
-        new_shape = new_Block[1]
-        self.block_shape = new_shape
+    def create_next(self):
+        N_block = creat_block()
+        next_block = N_block[0]
+        next_shape = N_block[1]
+        self.next_block = next_block
+        self.next_shape = next_shape
         # get the initial index of every new blocks for further block rotation function
-        self.block_id = self.block_shape.index(self.block)
+        self.next_block_id = self.next_shape.index(self.next_block)
         new_color_ind = random.choice(len(colors))
         new_color = colors[new_color_ind]
-        self.color = new_color
+        self.next_color = new_color
+        return self.next_block, self.next_shape, self.next_block_id, self.next_color
+
+    def draw_next(self, screen):
+        bg_cor1 = (50 + 11 * (cell_size + line), 100)
+        bg_width = 5 * (cell_size + line) + line
+        bg_height = 6 * (cell_size + line) + line
+        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1], bg_width, bg_height))
+        for sq in self.next_block:
+            line_corn1 = (50 + (sq[0] + 13) * (cell_size + line), 100 + (sq[1] + 6) * (cell_size + line))
+            line_corn2 = (50 + (sq[0] + 14) * (cell_size + line), 100 + (sq[1] + 6) * (cell_size + line))
+            line_corn3 = (50 + (sq[0] + 14) * (cell_size + line), 100 + (sq[1] + 7) * (cell_size + line))
+            line_corn4 = (50 + (sq[0] + 13) * (cell_size + line), 100 + (sq[1] + 7) * (cell_size + line))
+            corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
+            pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
+            pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
+            pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
+            pygame.draw.line(screen, (0, 0, 0), line_corn4, line_corn1)
+            pygame.draw.rect(screen, self.next_color, pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
+
+    def create_new_block(self):
+        self.block = self.next_block
+        self.block_shape = self.next_shape
+        # get the initial index of every new blocks for further block rotation function
+        self.block_id = self.next_block_id
+        self.color = self.next_color
+        self.create_next()
         return self.block, self.color, self.block_shape
 
     def falling(self):
@@ -175,7 +201,7 @@ class Blocks(object):
                         self.ex_color.append(self.color)
                         self.done_area.append(bol)
                     self.clear_row()
-                    self.creat_new_block()
+                    self.create_new_block()
                     game = 1
                     return game
                 else:
@@ -190,7 +216,7 @@ class Blocks(object):
                 self.ex_color.append(self.color)
                 self.done_area.append(bol)
             self.clear_row()
-            self.creat_new_block()
+            self.create_new_block()
             game = 1
             return game
 
@@ -266,6 +292,7 @@ def main():
     block_shape = Block[1]
     block_id = Block[2]
     screen_block = Blocks(block, block_shape, block_id)
+    screen_block.create_next()
     move_time = 300
     time = pygame.time.get_ticks() + move_time
     game = 1
@@ -293,6 +320,7 @@ def main():
                         pause = not pause
         display_screen(screen)
         screen_block.draw_block(cell_size, line, screen)
+        screen_block.draw_next(screen)
         if game == 2:
             over_font = pygame.font.Font(None, 60)
             black = (0, 0, 0)
