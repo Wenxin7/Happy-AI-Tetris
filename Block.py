@@ -1,7 +1,7 @@
 import random
 import pygame
 from numpy import *
-from pygame.locals import KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN, K_SPACE
+from pygame.locals import KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN, K_SPACE, K_RETURN
 
 # Define block shapes and shapes after rotation
 T = [[(-1, -3), (0, -3), (1, -3), (0, -4)],
@@ -23,11 +23,11 @@ J = [[(0, -5), (0, -4), (0, -3), (-1, -3)],
      [(0, -1), (0, -2), (0, -3), (1, -3)],
      [(-2, -3), (-1, -3), (0, -3), (0, -2)]]
 O = [[(-1, -4), (-1, -3), (0, -4), (0, -3)]]
-
+reward = [[(0, -3)]]
 blocks = [T, Z, S, I, L, J, O]
 
 # Define the color
-colors = [(255, 0, 0), (30, 144, 255), (255, 255, 0), (46, 139, 87), (160, 32, 240), (255, 165, 0), (255, 105, 180)]
+colors = [(174, 99, 120), (19, 131, 194), (253, 143, 82), (148, 180, 71), (185, 194, 227), (196, 128, 98), (240, 166, 179)]
 
 # Define the game board
 cell_size = 25
@@ -42,15 +42,61 @@ board_start_x = (screen_width - board_width) // 2
 board_start_y = screen_height - board_height
 
 
-
 def game_text(screen, font, x, y, message, color):
     text = font.render(message, 1, color)
     screen.blit(text, (x, y))
 
 
+def Home_page():
+    pygame.init()
+    screen = pygame.display.set_mode((screen_width, screen_height))
+    pygame.display.set_caption('Happy AI Tetris')
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+        home_display(screen)
+        button(screen, "level 1", 1, level_1)
+        button(screen, "Quit", 3, quit_game)
+        pygame.display.update()
+
+
+def home_display(screen):
+    screen.fill((252, 230, 201))
+    font_title = pygame.font.SysFont('Arial', 60)
+    font_title_x = int(font_title.size("Happy AI Tetris")[0])
+    font_title_y = int(font_title.size("Happy AI Tetris")[1])
+    x = (screen_width - font_title_x)/2
+    y = 50
+    game_text(screen, font_title, x, y, "Happy AI Tetris", (19, 131, 194))
+
+
+def button(screen, text, level, func):
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+    font_level_small = pygame.font.SysFont('Arial', 30)
+    font_level_large = pygame.font.SysFont('Arial', 35)
+    w = int(font_level_small.size(text)[0])
+    h = int(font_level_small.size(text)[1])
+    x = (screen_width - w)/2
+    y = 200 + 50 * level
+    if x < mouse[0] < x + w and y < mouse[1] < y + h:
+        game_text(screen, font_level_large, x, y, text, (56, 82, 132))
+        if click[0] == 1:
+            func()
+    else:
+        game_text(screen, font_level_small, x, y, text, (90, 167, 167))
+
+
+def quit_game():
+    pygame.quit()
+    quit()
+
+
 def display_screen(screen):
     screen.fill((252, 230, 201))
-    pygame.draw.rect(screen, (255, 250, 250),pygame.Rect(50, 100, board_width, board_height))
+    pygame.draw.rect(screen, (255, 250, 250), pygame.Rect(50, 100, board_width, board_height))
     for x in range(columns + 1):
         pygame.draw.line(screen, (0, 0, 0), (50 + x * (cell_size + line), 100), (50 + x * (cell_size + line), board_height + 99))
     for y in range(rows + 1):
@@ -60,18 +106,18 @@ def display_screen(screen):
     font_1 = pygame.font.SysFont('Arial', 12)
     font_width = int(font_1.size("Press SPACE to pause the game")[0])
     font_height = int(font_1.size("Press SPACE to pause the game")[1])
-    pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(313, 595, font_width + 5, font_height + 5))
-    game_text(screen, font_1, 318, 600, "Press SPACE to pause the game", (160, 32, 240))
+    # pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(313, 595, font_width + 5, font_height + 5))
+    game_text(screen, font_1, 318, 600, "Press SPACE to pause the game", (104, 149, 191))
     bg_cor1 = (50 + 11 * (cell_size + line), 100)
     bg_width = 5 * (cell_size + line) + line
     bg_height = 2 * (cell_size + line) + line
-    pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1], bg_width, bg_height))
+    # pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1], bg_width, bg_height))
     font_2 = pygame.font.SysFont('Arial', 20)
     font_width = int(font_2.size("Next Block")[0])
     font_height = int(font_2.size("Next Block")[1])
     font_x = bg_cor1[0] + (bg_width - font_width)/2
     font_y = bg_cor1[1] + (bg_height - font_height)/2
-    game_text(screen, font_2, font_x, font_y, "Next Block", (160, 32, 240))
+    game_text(screen, font_2, font_x, font_y + 20, "Next Block", (104, 149, 191))
 
 
 def creat_block():
@@ -156,17 +202,48 @@ class Blocks(object):
     NB = None
 
     def create_next(self):
-        N_block = creat_block()
-        next_block = N_block[0]
-        next_shape = N_block[1]
-        self.next_block = next_block
-        self.next_shape = next_shape
-        # get the initial index of every new blocks for further block rotation function
-        self.next_block_id = self.next_shape.index(self.next_block)
-        new_color_ind = random.choice(len(colors))
-        new_color = colors[new_color_ind]
-        self.next_color = new_color
-        return self.next_block, self.next_shape, self.next_block_id, self.next_color
+        if self.clear_num % 5 != 0 or self.clear_num == 0:
+            # When clear row is not 5, 10, 15 and so on, the next block will be created in normal shape
+            N_block = creat_block()
+            next_block = N_block[0]
+            next_shape = N_block[1]
+            self.next_block = next_block
+            self.next_shape = next_shape
+            # get the initial index of every new blocks for further block rotation function
+            self.next_block_id = self.next_shape.index(self.next_block)
+            new_color_ind = random.choice(len(colors))
+            new_color = colors[new_color_ind]
+            self.next_color = new_color
+            return self.next_block, self.next_shape, self.next_block_id, self.next_color
+        elif self.clear_num % 5 == 0 and self.clear_num != 0:
+            '''
+            When the clear row is 5, 10, 15 and so on, which also means the score reach every 500, the player get 
+            a reward block which only has one little square.
+            '''
+            if self.score_jug % 5000 == 0:
+                # To make sure the reward block shows only once for each 500 score.
+                next_block = reward[0]
+                next_shape = reward
+                self.next_block = next_block
+                self.next_shape = next_shape
+                self.next_block_id = self.next_shape.index(self.next_block)
+                new_color_ind = random.choice(len(colors))
+                new_color = colors[new_color_ind]
+                self.next_color = new_color
+                self.score_jug += 1
+                return self.next_block, self.next_shape, self.next_block_id, self.next_color
+            else:
+                N_block = creat_block()
+                next_block = N_block[0]
+                next_shape = N_block[1]
+                self.next_block = next_block
+                self.next_shape = next_shape
+                # get the initial index of every new blocks for further block rotation function
+                self.next_block_id = self.next_shape.index(self.next_block)
+                new_color_ind = random.choice(len(colors))
+                new_color = colors[new_color_ind]
+                self.next_color = new_color
+                return self.next_block, self.next_shape, self.next_block_id, self.next_color
 
     def draw_next(self, screen):
         bg_cor1 = (50 + 11 * (cell_size + line), 175)
@@ -258,6 +335,7 @@ class Blocks(object):
                     self.ex_color.pop(self.done_area.index(i))
                     self.done_area.remove(i)
                 self.clear_num += 1
+                self.score_jug = self.clear_num * 1000
                 done_temp = []
                 for bl in self.done_area[:]:
                     if bl[1] < row_done:
@@ -269,8 +347,8 @@ class Blocks(object):
     def draw_score(self, screen):
         bg_cor1 = (50 + 11 * (cell_size + line), 400)
         bg_width = 5 * (cell_size + line) + line
-        bg_height = 5 * (cell_size + line) + line
-        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1], bg_width, bg_height))
+        bg_height = 2 * (cell_size + line) + line
+        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1] + 55, bg_width, bg_height))
         font_2 = pygame.font.SysFont('Arial', 20)
         font_3 = pygame.font.SysFont('Cambria Math', 24)
         font_width = int(font_2.size("Score")[0])
@@ -281,9 +359,8 @@ class Blocks(object):
         font_height_s = int(font_3.size('Score:%05d' % (self.clear_num * 100))[1])
         font_x_s = bg_cor1[0] + (bg_width - font_width_s) / 2
         font_y_s = font_y + font_height_s + 25
-        game_text(screen, font_2, font_x, font_y, "Score", (160, 32, 240))
+        game_text(screen, font_2, font_x, font_y, "Score", (104, 149, 191))
         game_text(screen, font_3, font_x_s, font_y_s, 'Score:%05d' % (self.clear_num * 100), (178, 34, 34))
-
 
     def draw_block(self, cell_size, line, screen):
         if self.falling:
@@ -311,7 +388,7 @@ class Blocks(object):
                 pygame.draw.rect(screen, self.ex_color[self.done_area.index(pot)], pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
 
 
-def main():
+def level_1():
     # Initialize the screen
     pygame.init()
     screen = pygame.display.set_mode((screen_width, screen_height))
@@ -347,14 +424,27 @@ def main():
                 elif event.key == K_SPACE:
                     if game == 1:
                         pause = not pause
+                elif event.key == K_RETURN:
+                    if game == 2:
+                        Block = creat_block()
+                        block = Block[0]
+                        block_shape = Block[1]
+                        block_id = Block[2]
+                        screen_block = Blocks(block, block_shape, block_id)
+                        screen_block.done_area = []
+                        screen_block.ex_color = []
+                        screen_block.create_next()
+                        game = 1
         display_screen(screen)
         screen_block.draw_score(screen)
         screen_block.draw_block(cell_size, line, screen)
         screen_block.draw_next(screen)
         if game == 2:
             over_font = pygame.font.Font(None, 60)
+            restart_font = pygame.font.Font(None, 40)
             black = (0, 0, 0)
             game_text(screen, over_font, 75, 250, "Game Over", black)
+            game_text(screen, restart_font, 75, 375, "Press Enter to restart game", (25, 25, 112))
         pygame.display.update()
         if pause:
             time = pygame.time.get_ticks()
@@ -368,7 +458,8 @@ def main():
 
 
 
-main()
+
+Home_page()
 
 
 
