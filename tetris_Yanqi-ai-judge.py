@@ -4,33 +4,33 @@ import pygame
 from numpy import *
 from pygame.locals import KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN
 
-columns = 10    # screen wide
-rows = 25    # screen height
+# columns = 10    # screen wide
+# rows = 25    # screen height
 
 
-def judging_centers(done_area):
+def judging_centers(done_area, block_shape):
     block_dir = {
         'I': [[(0, -4), (0, -3), (0, -2), (0, -1)],
-              [(-1, -3), (0, -3), (1, -3), (2, -3)]],
+            [(-1, -3), (0, -3), (1, -3), (2, -3)]],
         'J': [[(0, -5), (0, -4), (0, -3), (-1, -3)],
-              [(2, -3), (1, -3), (0, -3), (0, -4)],
-              [(0, -1), (0, -2), (0, -3), (1, -3)],
-              [(-2, -3), (-1, -3), (0, -3), (0, -2)]],
+            [(2, -3), (1, -3), (0, -3), (0, -4)],
+            [(0, -1), (0, -2), (0, -3), (1, -3)],
+            [(-2, -3), (-1, -3), (0, -3), (0, -2)]],
         'L': [[(0, -5), (0, -4), (0, -3), (1, -3)],
-              [(2, -3), (1, -3), (0, -3), (0, -2)],
-              [(0, -1), (0, -2), (0, -3), (-1, -3)],
-              [(-2, -3), (-1, -3), (0, -3), (0, -4)]],
+            [(2, -3), (1, -3), (0, -3), (0, -2)],
+            [(0, -1), (0, -2), (0, -3), (-1, -3)],
+            [(-2, -3), (-1, -3), (0, -3), (0, -4)]],
         'O': [[(-1, -4), (-1, -3), (0, -4), (0, -3)]],
         'S': [[(1, -4), (0, -4), (0, -3), (-1, -3)],
-              [(1, -2), (1, -3), (0, -3), (0, -4)]],
+            [(1, -2), (1, -3), (0, -3), (0, -4)]],
         'T': [[(-1, -3), (0, -3), (1, -3), (0, -4)],
-              [(0, -4), (0, -3), (1, -3), (0, -2)],
-              [(-1, -3), (0, -3), (1, -3), (0, -2)],
-              [(0, -4), (0, -3), (-1, -3), (0, -2)]],
+            [(0, -4), (0, -3), (1, -3), (0, -2)],
+            [(-1, -3), (0, -3), (1, -3), (0, -2)],
+            [(0, -4), (0, -3), (-1, -3), (0, -2)]],
         'Z': [[(-1, -4), (0, -4), (0, -3), (1, -3)],
-              [(0, -4), (0, -3), (-1, -3), (-1, -2)]]
-    }
-    # 重新建立坐标系
+            [(0, -4), (0, -3), (-1, -3), (-1, -2)]]
+     }
+     # 重新建立坐标系
     def block_to_matrix():
         screen_matrix = [[None] * columns for i in range(rows)]
         for done in done_area:
@@ -56,15 +56,28 @@ def judging_centers(done_area):
         return False
 
     # get all possible position to all for blocks
-    centerList = []
-    for b_type in block_dir.keys():
-        for block_id in range(len(block_dir[b_type])): 
-            for w in range(-4, 5):
-                for h in range(25, 0, -1):
-                    if (wrong_position(b_type, block_id, (w, h)) == False) and (wrong_position(b_type, block_id, (w, h+1)) == True):
-                        centerList.append([b_type, block_id, (w, h)])
-
+    given_block_type = 'S'
+    for b_t in block_dir.keys():
+        if block_shape == block_dir[b_t]:
+            given_block_type = b_t
     
+    centerList = []
+    for rotation_type in range(len(block_shape)):
+        for w in range(-4, 5):
+            for h in range(25, 0, -1):
+                if (wrong_position(given_block_type, rotation_type, (w, h)) == False) and (wrong_position(given_block_type, rotation_type, (w, h+1)) == True):
+                        centerList.append([given_block_type, rotation_type, (w, h)])
+    
+
+#     # centerList = []
+#     # for b_type in block_dir.keys():
+#     #     for block_id in range(len(block_dir[b_type])): 
+#     #         for w in range(-4, 5):
+#     #             for h in range(25, 0, -1):
+#     #                 if (wrong_position(b_type, block_id, (w, h)) == False) and (wrong_position(b_type, block_id, (w, h+1)) == True):
+#     #                     centerList.append([b_type, block_id, (w, h)])
+
+
 
     # count scores     
     for centerlist in centerList:
@@ -101,12 +114,13 @@ def judging_centers(done_area):
             t = 0
             for j in range(columns):
                 if matrix_after[i][j] is not None:
-                    t += 1
+                        t += 1
             if t == columns:
                 eliminate_line += 1
                 for b_posi in new_block_position:
-                    if b_posi[1] == i-2:
-                        useful_cube += 1
+                        if b_posi[1] == i-2:
+                            useful_cube += 1
+
         elimination_contribution = eliminate_line * useful_cube
         centerlist.append(elimination_contribution)    # elimination_contribution 作为表中第五列
 
@@ -115,7 +129,7 @@ def judging_centers(done_area):
         for i in range(rows-1, 0, -1):
             for j in range(columns-1):
                 if (matrix_after[i][j] == None and matrix_after[i][j + 1] != None) or (matrix_after[i][j] != None and matrix_after[i][j + 1] == None):
-                    roll_transition_times += 1
+                        roll_transition_times += 1
         centerlist.append(roll_transition_times)    # roll_transition_times 作为表中第六列
 
         # get BroadColTrandition
@@ -123,7 +137,7 @@ def judging_centers(done_area):
         for j in range(columns):
             for i in range(rows-1, 1, -1):
                 if (matrix_after[i][j] == None and matrix_after[i-1][j] != None) or (matrix_after[i][j] != None and matrix_after[i-1][j] == None):
-                    col_transition_times += 1
+                        col_transition_times += 1
         centerlist.append(col_transition_times)    # col_transition_times 作为表中第七列
     
         # get empty_holes
@@ -132,9 +146,9 @@ def judging_centers(done_area):
             t = None
             for i in range(rows):
                 if matrix_after[i][j] != None and t == None:
-                    t = 0
+                        t = 0
                 if matrix_after[i][j] == None and t != None:
-                    t += 1
+                        t += 1
             if t != None:
                 empty_holes += t
         centerlist.append(empty_holes)    # empty_holes 作为表中第八列
@@ -145,34 +159,37 @@ def judging_centers(done_area):
         for i in range (columns):
             for j in range(rows):
                 if matrix_after[j][i] == None:
-                    if (i == 0) and (matrix_after[j][i+1] != None):
-                        wall_brick += 1
-                    elif (i>0) and (i< columns-1) and (matrix_after[j][i-1] != None) and (matrix_after[j][i+1] != None):
-                        wall_brick += 1
-                    elif (i == columns-1) and (matrix_after[j][i-1] != None):
-                       wall_brick += 1
+                        if (i == 0) and (matrix_after[j][i+1] != None):
+                            wall_brick += 1
+                        elif (i>0) and (i< columns-1) and (matrix_after[j][i-1] != None) and (matrix_after[j][i+1] != None):
+                            wall_brick += 1
+                        elif (i == columns-1) and (matrix_after[j][i-1] != None):
+                            wall_brick += 1
                 else:
-                    wells_number += ((wall_brick +1)*wall_brick/2)
-                    wall_brick = 0
+                        wells_number += ((wall_brick +1)*wall_brick/2)
+                        wall_brick = 0
         centerlist.append(wells_number)    # wells_number 作为表中第九列
 
         # get whole point of each center position of a kind rotation
-        whole_point = -45*centerlist[3] + 100*centerlist[4] - 32*centerlist[5] - 98*centerlist[6] -79*centerlist[7] -34*centerlist[3]
+        # whole_point = -45*centerlist[3] + 34*centerlist[4] - 32*centerlist[5] - 93*centerlist[6] -79*centerlist[7] -34*centerlist[3]
+        whole_point = -centerlist[3] + centerlist[4] - centerlist[5] - centerlist[6] -4*centerlist[7] -centerlist[3]
+        
         centerlist.append(whole_point)    # whole_point 作为表中第十列
         print(centerlist)
 
     # choose the optimal block with rotation and center:
-    # largest_point_block = centerList[0]
-    # for centerlist in centerList:
-    #     if centerlist[9] > largest_point_block[9]:
-    #         largest_point_block = centerlist
-    point_list = []
+    largest_point_block = centerList[0]
     for centerlist in centerList:
-        point_list.append(centerlist[9])
+        if centerlist[9] >= largest_point_block[9]:
+            largest_point_block = centerlist
+
+    # point_list = []
+    # for centerlist in centerList:
+    #     point_list.append(centerlist[9])
         
-        max_index = point_list.index(max(point_list))
+    #     max_index = point_list.index(max(point_list))
     
-    largest_point_block = centerList[max_index]
+    # largest_point_block = centerList[max_index]
     print(largest_point_block)
 
     # 返回块种类，块的旋转方式ID，块落在坐标系中的坐标(dlt_x, dlt_y), 块的原始点
@@ -240,12 +257,6 @@ def creat_block():
     block_shape = random.choice(blocks)
     block = block_shape[0]
     block_id = block_shape.index(block)
-    # block_shape = [[(-1, -3), (0, -3), (1, -3), (0, -4)],
-    #                     [(0, -4), (0, -3), (1, -3), (0, -2)],
-    #                     [(-1, -3), (0, -3), (1, -3), (0, -2)],
-    #                     [(0, -4), (0, -3), (-1, -3), (0, -2)]]
-    # block = block_shape[0]
-    # block_id = block_shape.index(block)
 
     return block, block_shape, block_id
 
@@ -261,34 +272,6 @@ class Blocks(object):
 
     def __call__(self):
         return self.block
-
-    def rotation(self):
-        ro_block = []
-        index = self.block_id
-        # Record the movement of the block and apply the same movement to the block after rotation
-        del_x = self.block[0][0] - self.block_shape[index][0][0]
-        del_y = self.block[0][1] - self.block_shape[index][0][1]
-        if index + 1 <= len(self.block_shape) - 1:
-            new_block = self.block_shape[index + 1]
-            for sq in new_block:
-                ro_block.append((sq[0] + del_x, sq[1] + del_y))
-            if self.chk_rotation(ro_block):
-                self.block = ro_block
-                self.block_id = index + 1
-        else:
-            new_block = self.block_shape[0]
-            for sq in new_block:
-                ro_block.append((sq[0] + del_x, sq[1] + del_y))
-            if self.chk_rotation(ro_block):
-                self.block = ro_block
-                self.block_id = 0
-        return self.block, self.block_id
-
-    def chk_rotation(self, block):
-        for sq in block:
-            if sq[0] < -4 or sq[0] > 5:
-                return False
-        return True
 
     def chk_move(self, del_x, del_y):
         for sq in self.block:
@@ -323,26 +306,14 @@ class Blocks(object):
     ex_color = []
     whole_cor = []
 
-    def creat_new_block(self):
-        # Z = [[(-1, -4), (0, -4), (0, -3), (1, -3)],[(0, -4), (0, -3), (-1, -3), (-1, -2)]]
-        # if len(self.done_area) < 4:
-        #     new_block = [[(-1, -3), (0, -3), (1, -3), (0, -4)],
-        #                 [(0, -4), (0, -3), (1, -3), (0, -2)],
-        #                 [(-1, -3), (0, -3), (1, -3), (0, -2)],
-        #                 [(0, -4), (0, -3), (-1, -3), (0, -2)]]
-            # for list in new_block:
-            #     for cor in list:
-            #         cor[0] = cor[0] - 3
-            # self.block = new_block
-            # new_shape = [(-1, -3), (0, -3), (1, -3), (0, -2)]
-            # self.block_shape = new_shape
-            # new_Block = creat_block()
-            # new_block = new_Block[0]
+    def creat_new_block(self):   
+        new_Block = creat_block()
+        new_block = new_Block[1]
             # self.block = new_block
             # new_shape = new_Block[1]
-            # self.block_shape = new_shape
-        d_x = judging_centers(self.done_area)[2][0]
-        block_cor = judging_centers(self.done_area)[3]
+            
+        d_x = judging_centers(self.done_area, new_block)[2][0]
+        block_cor = judging_centers(self.done_area, new_block)[3]
         new_cor = []
         for co in block_cor:
             
@@ -350,10 +321,7 @@ class Blocks(object):
             n_y = co[1]
             new_cor.append((n_x, n_y))         
         self.block = new_cor
-        # for b_type in blocks:
-        #     for rotation_type in blocks(b_type):
-        #         if new_cor == rotation_type:
-        #             self.block = blocks(b_type)
+
 
         self.block_shape = new_cor
         # new_Block = creat_block()
@@ -474,15 +442,7 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            # elif event.type == pygame.KEYDOWN:
-                # if event.key == K_LEFT:
-                #     screen_block.key_control(-1, 0)
-                # elif event.key == K_RIGHT:
-                #     screen_block.key_control(1, 0)
-                # elif event.key == K_DOWN:
-                #     screen_block.key_control(0, 1)
-                # elif event.key == K_UP:
-                #     screen_block.rotation()
+            
         display_screen(screen)
         screen_block.draw_block(cell_size, line, screen)
         pygame.display.update()
