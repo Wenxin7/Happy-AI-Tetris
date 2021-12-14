@@ -59,8 +59,8 @@ def Home_page():
         home_display(screen)
         button_home(screen, "level 1", 1, level_1)
         button_home(screen, "level 2", 2, level_2)
-        button_home(screen, "level 3", 2, level_3)
-        button_home(screen, "Quit", 3, quit_game)
+        button_home(screen, "level 3", 3, level_3)
+        button_home(screen, "Quit", 4, quit_game)
         pygame.display.update()
 
 
@@ -70,7 +70,7 @@ def home_display(screen):
     font_title_x = int(font_title.size("Happy AI Tetris")[0])
     font_title_y = int(font_title.size("Happy AI Tetris")[1])
     x = (screen_width - font_title_x)/2
-    y = 50
+    y = 75
     game_text(screen, font_title, x, y, "Happy AI Tetris", (19, 131, 194))
 
 
@@ -82,7 +82,7 @@ def button_home(screen, text, level, func):
     w = int(font_level_small.size(text)[0])
     h = int(font_level_small.size(text)[1])
     x = (screen_width - w)/2
-    y = 200 + 50 * level
+    y = 200 + 100 * level
     if x < mouse[0] < x + w and y < mouse[1] < y + h:
         game_text(screen, font_level_large, x, y, text, (56, 82, 132))
         if pygame.mouse.get_pressed()[0]:
@@ -124,7 +124,7 @@ def display_screen(screen):
     font_width = int(font_1.size("Press SPACE to pause the game")[0])
     font_height = int(font_1.size("Press SPACE to pause the game")[1])
     # pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(313, 595, font_width + 5, font_height + 5))
-    game_text(screen, font_1, 318, 600, "Press SPACE to pause the game", (104, 149, 191))
+    game_text(screen, font_1, 318, 600, "Press SPACE to pause the game", (226, 90, 83))
     bg_cor1 = (50 + 11 * (cell_size + line), 100)
     bg_width = 5 * (cell_size + line) + line
     bg_height = 2 * (cell_size + line) + line
@@ -135,6 +135,7 @@ def display_screen(screen):
     font_x = bg_cor1[0] + (bg_width - font_width)/2
     font_y = bg_cor1[1] + (bg_height - font_height)/2
     game_text(screen, font_2, font_x, font_y + 20, "Next Block", (104, 149, 191))
+    button_return(screen, "return", 75 + 11 * (cell_size + line), 675, Home_page)
 
 
 def creat_block():
@@ -423,8 +424,10 @@ def level_1():
     block = Block[0]
     block_shape = Block[1]
     block_id = Block[2]
-    screen_block = Blocks(block, block_shape, block_id)
-    screen_block.create_next()
+    screen_block1 = Blocks(block, block_shape, block_id)
+    screen_block1.create_next()
+    screen_block1.done_area = []
+    screen_block1.ex_color = []
     move_time = 500
     time = pygame.time.get_ticks() + move_time
     game = 1
@@ -437,16 +440,16 @@ def level_1():
             elif event.type == pygame.KEYDOWN:
                 if event.key == K_LEFT:
                     if game == 1 and not pause:
-                        screen_block.key_control(-1, 0)
+                        screen_block1.key_control(-1, 0)
                 elif event.key == K_RIGHT:
                     if game == 1 and not pause:
-                        screen_block.key_control(1, 0)
+                        screen_block1.key_control(1, 0)
                 elif event.key == K_DOWN:
                     if game == 1 and not pause:
-                        screen_block.key_control(0, 1)
+                        screen_block1.key_control(0, 1)
                 elif event.key == K_UP:
                     if game == 1 and not pause:
-                        screen_block.rotation()
+                        screen_block1.rotation()
                 elif event.key == K_SPACE:
                     if game == 1:
                         pause = not pause
@@ -462,23 +465,22 @@ def level_1():
                         screen_block.create_next()
                         game = 1
         display_screen(screen)
-        button_return(screen, "return", 75 + 11 * (cell_size + line), 700, Home_page)
-        screen_block.draw_score(screen)
-        screen_block.draw_block(cell_size, line, screen)
-        screen_block.draw_next(screen)
+        screen_block1.draw_score(screen)
+        screen_block1.draw_block(cell_size, line, screen)
+        screen_block1.draw_next(screen)
         if game == 2:
             over_font = pygame.font.Font(None, 60)
             restart_font = pygame.font.Font(None, 40)
             black = (0, 0, 0)
             game_text(screen, over_font, 75, 250, "Game Over", black)
-            game_text(screen, restart_font, 75, 375, "Press Enter to restart game", (25, 25, 112))
+            game_text(screen, restart_font, 75, 375, "Press Enter to restart game", (226, 90, 83))
         pygame.display.update()
         if pause:
             time = pygame.time.get_ticks()
         if pygame.time.get_ticks() >= time:
             if game == 1 and not pause:
                 time = pygame.time.get_ticks() + move_time
-                game = screen_block.falling()
+                game = screen_block1.falling()
 
 
 def level_2():
@@ -490,8 +492,10 @@ def level_2():
     block = Block[0]
     block_shape = Block[1]
     block_id = Block[2]
-    screen_block = Blocks(block, block_shape, block_id)
-    screen_block.create_next()
+    screen_block2 = Blocks(block, block_shape, block_id)
+    screen_block2.create_next()
+    screen_block2.done_area = []
+    screen_block2.ex_color = []
     move_time = 600
     time = pygame.time.get_ticks() + move_time
     game = 1
@@ -504,16 +508,16 @@ def level_2():
             elif event.type == pygame.KEYDOWN:
                 if event.key == K_LEFT:
                     if game == 1 and not pause:
-                        screen_block.key_control(-1, 0)
+                        screen_block2.key_control(-1, 0)
                 elif event.key == K_RIGHT:
                     if game == 1 and not pause:
-                        screen_block.key_control(1, 0)
+                        screen_block2.key_control(1, 0)
                 elif event.key == K_DOWN:
                     if game == 1 and not pause:
-                        screen_block.key_control(0, 1)
+                        screen_block2.key_control(0, 1)
                 elif event.key == K_UP:
                     if game == 1 and not pause:
-                        screen_block.rotation()
+                        screen_block2.rotation()
                 elif event.key == K_SPACE:
                     if game == 1:
                         pause = not pause
@@ -528,17 +532,16 @@ def level_2():
                         screen_block.ex_color = []
                         screen_block.create_next()
                         game = 1
-        button_return(screen, "return", 75 + 11 * (cell_size + line), 700, Home_page)
         display_screen(screen)
-        screen_block.draw_score(screen)
-        screen_block.draw_block(cell_size, line, screen)
-        screen_block.draw_next(screen)
+        screen_block2.draw_score(screen)
+        screen_block2.draw_block(cell_size, line, screen)
+        screen_block2.draw_next(screen)
         '''
         In level 2, For every 5 rows of blocks the player removes, 
         the block's fall speed increases by 50 milliseconds until the fastest speed.
         '''
-        if screen_block.clear_num % 5 == 0 and screen_block.clear_num != 0 and screen_block.clear_num < 30:
-            move_time -= 50
+        if screen_block2.clear_num % 5 == 0 and screen_block2.clear_num != 0 and screen_block2.clear_num <= 15:
+            move_time -= 100
         if game == 2:
             over_font = pygame.font.Font(None, 60)
             restart_font = pygame.font.Font(None, 40)
@@ -551,7 +554,7 @@ def level_2():
         if pygame.time.get_ticks() >= time:
             if game == 1 and not pause:
                 time = pygame.time.get_ticks() + move_time
-                game = screen_block.falling()
+                game = screen_block2.falling()
 
 
 def level_3():
@@ -563,8 +566,10 @@ def level_3():
     block = Block[0]
     block_shape = Block[1]
     block_id = Block[2]
-    screen_block = Blocks(block, block_shape, block_id)
-    screen_block.create_next()
+    screen_block3 = Blocks(block, block_shape, block_id)
+    screen_block3.create_next()
+    screen_block3.done_area = []
+    screen_block3.ex_color = []
     move_time = 500
     time = pygame.time.get_ticks() + move_time
     game = 1
@@ -577,16 +582,16 @@ def level_3():
             elif event.type == pygame.KEYDOWN:
                 if event.key == K_LEFT:
                     if game == 1 and not pause:
-                        screen_block.key_control(-1, 0)
+                        screen_block3.key_control(-1, 0)
                 elif event.key == K_RIGHT:
                     if game == 1 and not pause:
-                        screen_block.key_control(1, 0)
+                        screen_block3.key_control(1, 0)
                 elif event.key == K_DOWN:
                     if game == 1 and not pause:
-                        screen_block.key_control(0, 1)
+                        screen_block3.key_control(0, 1)
                 elif event.key == K_UP:
                     if game == 1 and not pause:
-                        screen_block.rotation()
+                        screen_block3.rotation()
                 elif event.key == K_SPACE:
                     if game == 1:
                         pause = not pause
@@ -602,13 +607,12 @@ def level_3():
                         screen_block.create_next()
                         game = 1
         display_screen(screen)
-        button_return(screen, "return", 75 + 11 * (cell_size + line), 700, Home_page)
-        screen_block.draw_score(screen)
-        screen_block.draw_block(cell_size, line, screen)
-        screen_block.draw_next(screen)
-        if (screen_block.clear_num * 1000) % 2000 == 0 and screen_block.clear_num != 0:
-            screen_block.extra_row()
-            screen_block.clear_num += 1
+        screen_block3.draw_score(screen)
+        screen_block3.draw_block(cell_size, line, screen)
+        screen_block3.draw_next(screen)
+        if (screen_block3.clear_num * 1000) % 2000 == 0 and screen_block3.clear_num != 0:
+            screen_block3.extra_row()
+            screen_block3.clear_num += 1
         if game == 2:
             over_font = pygame.font.Font(None, 60)
             restart_font = pygame.font.Font(None, 40)
@@ -621,7 +625,7 @@ def level_3():
         if pygame.time.get_ticks() >= time:
             if game == 1 and not pause:
                 time = pygame.time.get_ticks() + move_time
-                game = screen_block.falling()
+                game = screen_block3.falling()
 
 Home_page()
 
