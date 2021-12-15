@@ -11,7 +11,11 @@ the blocks.
 
 ## Install
 
-Download or cloen the repository from the wibsite run the file "Blocks.py" directly.
+Download or cloen the repository from the wibsite run the file "player.py" directly.
+
+'''
+python3 player.py
+'''
 
 ## Usage
 
