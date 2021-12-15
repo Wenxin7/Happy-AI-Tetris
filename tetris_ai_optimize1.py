@@ -63,11 +63,17 @@ def judging_centers(done_area, block_shape):
     
     centerList = []
     for rotation_type in range(len(block_shape)):
-        for w in range(-4, 5):
+        for w in range(-4, 6):
             for h in range(25, 0, -1):
-                if (wrong_position(given_block_type, rotation_type, (w, h)) == False) and (wrong_position(given_block_type, rotation_type, (w, h+1)) == True):
+                if (wrong_position(given_block_type, rotation_type, (w, h)) == False) and \
+                    (wrong_position(given_block_type, rotation_type, (w, h+1)) == True):
+                    
                         centerList.append([given_block_type, rotation_type, (w, h)])
-    
+    # for c_l in centerList:
+    #     x_range = [c_l[2][0] + cube[0] for cube in block_dir[c_l[0]][c_l[1]]]
+    #     y_range = [c_l[2][1] + cube[1] for cube in block_dir[c_l[0]][c_l[1]]]
+    #     for i in range(x_range):
+    #         for j in range(-)
 
 #     # centerList = []
 #     # for b_type in block_dir.keys():
@@ -171,8 +177,8 @@ def judging_centers(done_area, block_shape):
         centerlist.append(wells_number)    # wells_number 作为表中第九列
 
         # get whole point of each center position of a kind rotation
-        # whole_point = -45*centerlist[3] + 34*centerlist[4] - 32*centerlist[5] - 93*centerlist[6] -79*centerlist[7] -34*centerlist[3]
-        whole_point = -centerlist[3] + centerlist[4] - centerlist[5] - centerlist[6] -4*centerlist[7] -centerlist[3]
+        whole_point = -45*centerlist[3] + 34*centerlist[4] - 32*centerlist[5] - 98*centerlist[6] -79*centerlist[7] -34*centerlist[8]
+        # whole_point = -centerlist[3] + 2*centerlist[4] - centerlist[5] - centerlist[6] -4*centerlist[7] -centerlist[3]
         
         centerlist.append(whole_point)    # whole_point 作为表中第十列
         print(centerlist)
@@ -435,7 +441,7 @@ def main():
 
 
     screen_block = Blocks(block, block_shape, block_id)
-    move_time = 100
+    move_time = 30
     time = pygame.time.get_ticks() + move_time
     while True:
         for event in pygame.event.get():
