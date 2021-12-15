@@ -69,6 +69,20 @@ def judging_centers(done_area, block_shape):
                     (wrong_position(given_block_type, rotation_type, (w, h+1)) == True):
                     
                         centerList.append([given_block_type, rotation_type, (w, h)])
+    # 优化部分
+    
+    for c_l in centerList[:]:
+        dx = int(c_l[2][0])
+        dy = int(c_l[2][1])
+        
+        new_cor = [(cube[0] + dx, cube[1] + dy) for cube in block_dir[c_l[0]][c_l[1]]]
+        
+        for cor in new_cor:
+            for i in range(-2, cor[1]):
+                if screen_matrix[i+2][cor[0]+4] == 0:
+                    if c_l in centerList:
+                        centerList.remove(c_l)
+
     # for c_l in centerList:
     #     x_range = [c_l[2][0] + cube[0] for cube in block_dir[c_l[0]][c_l[1]]]
     #     y_range = [c_l[2][1] + cube[1] for cube in block_dir[c_l[0]][c_l[1]]]
