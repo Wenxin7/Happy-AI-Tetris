@@ -221,7 +221,7 @@ def Home_page():
         button_home(screen, "Level 2", 2, level_2)
         button_home(screen, "Level 3", 3, level_3)
         button_home(screen, "AI Tetris", 4, tetris_ai_optimize.main)
-        button_home(screen, "Quit", 4, quit_game)
+        button_home(screen, "Quit", 5, quit_game)
         pygame.display.update()
 
 
@@ -242,7 +242,7 @@ def quit_game():
 
 def display_screen(screen):
     '''
-    This function is to setting all the elements that will show on the home page and
+    This function is to setting all the elements that will show on the game playing page and
     draw the background.
 
     **Parameters**
@@ -252,43 +252,90 @@ def display_screen(screen):
 
     **Output**
 
-       All the texts that will be shown on the screen
+       All the texts and graphics that will be shown on the screen
     '''
+    # Fill the background with a single color
     screen.fill((252, 230, 201))
+    # Draw the background of playing area board
     pygame.draw.rect(screen, (255, 250, 250), pygame.Rect(50, 100, board_width, board_height))
+    # Draw all the column and row lines to generate grid board for playing tetris
     for x in range(columns + 1):
         pygame.draw.line(screen, (0, 0, 0), (50 + x * (cell_size + line), 100), (50 + x * (cell_size + line), board_height + 99))
     for y in range(rows + 1):
         pygame.draw.line(screen, (0, 0, 0), (50, y * (cell_size + line) + 100), (board_width + 49, y * (cell_size + line) + 100))
+    # Adding pause hint on the left side of the screen
     pygame.font.init()
-
     font_1 = pygame.font.SysFont('Arial', 12)
     font_width = int(font_1.size("Press SPACE to pause the game")[0])
     font_height = int(font_1.size("Press SPACE to pause the game")[1])
-    # pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(313, 595, font_width + 5, font_height + 5))
     game_text(screen, font_1, 318, 600, "Press SPACE to pause the game", (226, 90, 83))
+    '''
+    bg_cor1 means the background upper left corner of the "Next block" rectangle which is used to show 
+    the coming block
+    '''
     bg_cor1 = (50 + 11 * (cell_size + line), 100)
+    # The size of the "Next block" rectangle
     bg_width = 5 * (cell_size + line) + line
     bg_height = 2 * (cell_size + line) + line
-    # pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1], bg_width, bg_height))
+    # Setting the font style and size of "Next Block"
     font_2 = pygame.font.SysFont('Arial', 20)
     font_width = int(font_2.size("Next Block")[0])
     font_height = int(font_2.size("Next Block")[1])
+    # Setting the x and y coordinate of the text "Next Block"
     font_x = bg_cor1[0] + (bg_width - font_width)/2
     font_y = bg_cor1[1] + (bg_height - font_height)/2
     game_text(screen, font_2, font_x, font_y + 20, "Next Block", (104, 149, 191))
+    '''
+    Using the button_return function defined before to create a button on the lower right corner of the 
+    screen. When player click the return button, the page will jump back to home page
+    '''
     button_return(screen, "return", 75 + 11 * (cell_size + line), 675, Home_page)
 
 
 def creat_block():
+    '''
+    This function is for creating new blocks
+
+    **Parameters**
+        None
+
+    **Output**
+
+        block: *list*
+            each coordinate of four grids in this block
+        block_shape: *list*
+            the shape name of the block. eg. T, O, L, S
+            the letter variable is the list which includes all coordinates of the
+            initial shapes and shapes after rotation.
+        block_id: *int*
+            the index of newly created block in the corresponding block list.
+    '''
+    # Random choice from all kinds of block shape list
     block_shape = random.choice(blocks)
+    # The newly created block's initial direction will always be the first one in the corresponding block list
     block = block_shape[0]
+    # Store the index as block_id for further rotation function
     block_id = block_shape.index(block)
     return block, block_shape, block_id
 
 
 class Blocks(object):
+    '''
+    This class create a wrapper for functions which implement all the operations for tetris blocks,
+    including movement, rotation, create new block after landing and eliminating rows when a row is full.
+    Also, it has some checking functions to check whether some certain operation can be done or not.
+    The functions of drawing blocks are also included.
+
+    **Parameters**
+
+        list and int: *block* and *block_shape* and *block_id*
+            Each coordinate of four grids in this block. The letter variable is the
+            list which includes all coordinates of the initial shapes and shapes after rotation.
+            The index of newly created block in the corresponding block list.
+    '''
+
     def __init__(self, block, block_shape,  block_id):
+        # The color of each block will be chosen by random choice from color list.
         self.color_ind = random.choice(len(colors))
         self.color = colors[self.color_ind]
         self.block_shape = block_shape
@@ -298,6 +345,48 @@ class Blocks(object):
 
     def __call__(self):
         return self.block
+
+    def chk_rotation(self, block):
+        '''
+        This function is for checking whether the current block can rotate or not.
+
+        **Parameters**
+
+            block: *list*
+                Each coordinate of four grids in this block.
+
+        **Output**
+
+           valid: *bool*
+                Whether the rotation are valid (True) or not (False).
+        '''
+        for sq in block:
+            # Check the feasibility by checking the position of grids one by one.
+            if sq[0] < -4 or sq[0] > 5:
+                # If any one of the grid in the block will get out of the board range, return False.
+                # The x coordinate range of board is (-4,5).
+                return False
+        # After the loop, if there is no grid out of the range, return True
+        return True
+
+    def chk_move(self, del_x, del_y):
+        for sq in self.block:
+            if sq[1] + del_y > 22 or sq[0] + del_x < -4 or sq[0] + del_x > 5:
+                return False
+        return True
+
+    def chk_overlap(self, del_x, del_y):
+        for sq in self.block:
+            if (sq[0] + del_x, sq[1] + del_y) in self.done_area:
+                return False
+        return True
+
+    def chk_over(self):
+        # check whether there are done blocks already in the top row
+        for sq in self.block:
+            if sq[1] <= -2:
+                return False
+        return True
 
     def rotation(self):
         ro_block = []
@@ -321,30 +410,6 @@ class Blocks(object):
                 self.block_id = 0
         return self.block, self.block_id
 
-    def chk_rotation(self, block):
-        for sq in block:
-            if sq[0] < -4 or sq[0] > 5:
-                return False
-        return True
-
-    def chk_move(self, del_x, del_y):
-        for sq in self.block:
-            if sq[1] + del_y > 22 or sq[0] + del_x < -4 or sq[0] + del_x > 5:
-                return False
-        return True
-
-    def chk_overlap(self, del_x, del_y):
-        for sq in self.block:
-            if (sq[0] + del_x, sq[1] + del_y) in self.done_area:
-                return False
-        return True
-
-    def chk_over(self):
-        # check whether there are done blocks already in the top row
-        for sq in self.block:
-            if sq[1] <= -2:
-                return False
-        return True
 
     def move(self, del_x, del_y):
         new_block = []
@@ -769,7 +834,9 @@ def level_3():
                 time = pygame.time.get_ticks() + move_time
                 game = screen_block3.falling()
 
-Home_page()
+
+if __name__ == "__main__":
+    Home_page()
 
 
 

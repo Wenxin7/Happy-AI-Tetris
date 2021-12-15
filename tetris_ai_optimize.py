@@ -2,6 +2,8 @@ import copy
 import random
 import pygame
 from numpy import *
+import player
+
 
 def judging_centers(done_area, block_shape):
     block_dir = {
@@ -233,7 +235,7 @@ O = [[(-1, -4), (-1, -3), (0, -4), (0, -3)]]
 blocks = [T, Z, S, I, L, J, O]
 
 # Define the color
-colors = [(255, 0, 0), (30, 144, 255), (255, 255, 0), (46, 139, 87), (160, 32, 240), (255, 165, 0), (255, 105, 180)]
+colors = [(174, 99, 120), (19, 131, 194), (253, 143, 82), (148, 180, 71), (185, 194, 227), (196, 128, 98), (240, 166, 179)]
 
 # Define the game board
 cell_size = 25
@@ -315,7 +317,7 @@ def display_screen(screen):
     font_x = bg_cor1[0] + (bg_width - font_width) / 2
     font_y = bg_cor1[1] + (bg_height - font_height) / 2
     game_text(screen, font_2, font_x, font_y + 20, "Next Block", (104, 149, 191))
-    # button_return(screen, "return", 75 + 11 * (cell_size + line), 675, player.Home_page)
+    button_return(screen, "return", 75 + 11 * (cell_size + line), 675, player.Home_page)
 
 
 def creat_block():
@@ -422,8 +424,6 @@ class Blocks(object):
         if self.chk_move(0, 1):
             if self.chk_overlap(0, 1):
                 self.move(0, 1)
-                game = 1
-                return game
             else:
                 '''
                 First, check whether the current block will overlap with the block below 
@@ -436,23 +436,17 @@ class Blocks(object):
                         self.done_area.append(bol)
                     self.clear_row()
                     self.creat_new_block()
-                    game = 1
-                    return game
                 else:
                     for bol in self.block:
                         # Add the last block to done_area list
                         self.ex_color.append(self.color)
                         self.done_area.append(bol)
-                    game = 2
-                    return game
         else:
             for bol in self.block:
                 self.ex_color.append(self.color)
                 self.done_area.append(bol)
             self.clear_row()
             self.creat_new_block()
-            game = 1
-            return game
 
     def key_control(self, del_x, del_y):
         if self.chk_move(del_x, del_y):
@@ -545,6 +539,8 @@ def main():
     block_id = Block[2]
     screen_block = Blocks(block, block_shape, block_id)
     screen_block.create_next()
+    screen_block.done_area = []
+    screen_block.ex_color = []
     move_time = 100
     time = pygame.time.get_ticks() + move_time
     while True:
@@ -561,9 +557,3 @@ def main():
         if pygame.time.get_ticks() >= time:
             time += move_time
             screen_block.falling()
-
-
-
-
-
-main()
