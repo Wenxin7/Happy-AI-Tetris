@@ -13,9 +13,9 @@ the blocks.
 
 Download or cloen the repository from the wibsite run the file "player.py" directly.
 
-'''
+```
 python3 player.py
-'''
+```
 
 ## Usage
 
