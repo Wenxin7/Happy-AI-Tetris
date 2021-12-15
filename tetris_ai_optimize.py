@@ -1,4 +1,4 @@
-import copy
+# This file would be imported in AI game level
 import random
 import pygame
 from numpy import *
@@ -6,6 +6,24 @@ import player
 
 
 def judging_centers(done_area, block_shape):
+    '''
+    This function will enumerate all possible position and rotation type of blocks which are randomly
+    created, score which posibility and find the optimal possibilites. Finally we could get the best 
+    rotation type and optimal position to put the block.
+
+    **Parameters**
+
+        done_area: *list*
+            the coordinates of the blocks which are already placed in board
+        block_shape: *list*
+            the list which contain 1-4 kinds of rotation type, each type owns 4 coordinates of 
+            cubes in a kind of block
+
+    **Output**
+
+        the type of the block, the rotation type, the optimal position and the start point of block
+
+    '''
     block_dir = {
         'I': [[(0, -4), (0, -3), (0, -2), (0, -1)],
             [(-1, -3), (0, -3), (1, -3), (2, -3)]],
@@ -27,17 +45,38 @@ def judging_centers(done_area, block_shape):
         'Z': [[(-1, -4), (0, -4), (0, -3), (1, -3)],
             [(0, -4), (0, -3), (-1, -3), (-1, -2)]]
      }
-     # 重新建立坐标系
+     
     def block_to_matrix():
+        '''
+        This function aims to create a matrix used as boundary condition
+        
+        **Output**
+            the matrix with 25 lists and 10 'None' in each list to simulation coordinates
+        '''
         screen_matrix = [[None] * columns for i in range(rows)]
         for done in done_area:
             screen_matrix[done[1]+2][done[0]+4] = 0
         return screen_matrix
 
     screen_matrix = block_to_matrix()
-    # print(screen_matrix)
+    
     def wrong_position(block_type, block_id, fall_position):
-        # 要落下的方块的四格位置
+        '''
+        Judge if the input block type, its rotation type and predicted fallen sites are valid
+
+        **Parameters**
+
+            block_type: *string*
+                the type of a block, in alphabet
+            block_id: *int*
+                the index of rotation type
+            fall_position: *tuple*
+                delta x and delta y, which is the difference of final position and start point
+
+        **Output**
+            validity of the fallen position
+        '''
+        
         all_block_position = [(cube[0] + fall_position[0], cube[1] + fall_position[1]) for cube in block_dir[block_type][block_id]]
         for cube_co in all_block_position:
             if cube_co[0] < -4:
@@ -52,7 +91,7 @@ def judging_centers(done_area, block_shape):
                 return True
         return False
 
-    # get all possible position to all for blocks
+    # get all possible positions to all the given blocks and enumerate them
     given_block_type = 'S'
     for b_t in block_dir.keys():
         if block_shape == block_dir[b_t]:
@@ -66,7 +105,8 @@ def judging_centers(done_area, block_shape):
                     (wrong_position(given_block_type, rotation_type, (w, h+1)) == True):
                     
                         centerList.append([given_block_type, rotation_type, (w, h)])
-    # 优化部分
+
+    # delete the invalid possibilities
     
     for c_l in centerList[:]:
         dx = int(c_l[2][0])
@@ -80,34 +120,19 @@ def judging_centers(done_area, block_shape):
                     if c_l in centerList:
                         centerList.remove(c_l)
 
-    # for c_l in centerList:
-    #     x_range = [c_l[2][0] + cube[0] for cube in block_dir[c_l[0]][c_l[1]]]
-    #     y_range = [c_l[2][1] + cube[1] for cube in block_dir[c_l[0]][c_l[1]]]
-    #     for i in range(x_range):
-    #         for j in range(-)
 
-#     # centerList = []
-#     # for b_type in block_dir.keys():
-#     #     for block_id in range(len(block_dir[b_type])): 
-#     #         for w in range(-4, 5):
-#     #             for h in range(25, 0, -1):
-#     #                 if (wrong_position(b_type, block_id, (w, h)) == False) and (wrong_position(b_type, block_id, (w, h+1)) == True):
-#     #                     centerList.append([b_type, block_id, (w, h)])
-
-
-
-    # count scores     
+    # count scores parts, find the optimal case of ratation type and falling position     
     for centerlist in centerList:
 
-        # get LandingHeight
+        # get LandingHeight, and add it to the 4th column of centerlist
         h_list = []
         for cor in block_dir[centerlist[0]][centerlist[1]]:
             h_list.append(cor[1] + centerlist[2][1])
         LandingHeight = 23 - min(h_list)
-        centerlist.append(LandingHeight)    # LandingHeight 作为表中第四列
+        centerlist.append(LandingHeight)
 
         
-        # 得到下落之后matrix
+        # get the matrix after the choosen block fallen (in one case)
         matrix_after = [[None] * columns for i in range(rows)]
         for done in done_area:
             matrix_after[done[1]+2][done[0]+4] = 0
@@ -116,11 +141,11 @@ def judging_centers(done_area, block_shape):
             n_y = new_cor[1] + centerlist[2][1]
             matrix_after[n_y+2][n_x+4] = 0
         
-        # print(matrix_after)
 
-        # get eliminate contribution
+        # get eliminate contribution, the line number which could be eliminate after fallen times
+        # the block in the eliminate line, and add it to the 5th column of centerlist
 
-        new_block_position = []    # 方块落下之后四个cube坐标list
+        new_block_position = []
         for cube_pos in block_dir[centerlist[0]][centerlist[1]]:
             new_block_position.append((cube_pos[0]+centerlist[2][0], cube_pos[1]+centerlist[2][1])) 
 
@@ -139,25 +164,25 @@ def judging_centers(done_area, block_shape):
                             useful_cube += 1
 
         elimination_contribution = eliminate_line * useful_cube
-        centerlist.append(elimination_contribution)    # elimination_contribution 作为表中第五列
+        centerlist.append(elimination_contribution)
 
-        # get BroadRollTrandition
+        # get BroadRollTrandition, and add it to the 6th column of centerlist
         roll_transition_times = 0
         for i in range(rows-1, 0, -1):
             for j in range(columns-1):
                 if (matrix_after[i][j] == None and matrix_after[i][j + 1] != None) or (matrix_after[i][j] != None and matrix_after[i][j + 1] == None):
                         roll_transition_times += 1
-        centerlist.append(roll_transition_times)    # roll_transition_times 作为表中第六列
+        centerlist.append(roll_transition_times)
 
-        # get BroadColTrandition
+        # get BroadColTrandition, and add it to the 7th column of centerlist
         col_transition_times = 0
         for j in range(columns):
             for i in range(rows-1, 1, -1):
                 if (matrix_after[i][j] == None and matrix_after[i-1][j] != None) or (matrix_after[i][j] != None and matrix_after[i-1][j] == None):
                         col_transition_times += 1
-        centerlist.append(col_transition_times)    # col_transition_times 作为表中第七列
+        centerlist.append(col_transition_times)
     
-        # get empty_holes
+        # get empty_holes, and add it to the 8th column of centerlist
         empty_holes = 0
         for j in range(columns):
             t = None
@@ -168,9 +193,9 @@ def judging_centers(done_area, block_shape):
                         t += 1
             if t != None:
                 empty_holes += t
-        centerlist.append(empty_holes)    # empty_holes 作为表中第八列
+        centerlist.append(empty_holes)
 
-        # get wells_number
+        # get wells_number, and add it to the 9th column of centerlist
         wells_number = 0
         wall_brick = 0
         for i in range (columns):
@@ -185,32 +210,24 @@ def judging_centers(done_area, block_shape):
                 else:
                         wells_number += ((wall_brick +1)*wall_brick/2)
                         wall_brick = 0
-        centerlist.append(wells_number)    # wells_number 作为表中第九列
+        centerlist.append(wells_number)
 
-        # get whole point of each center position of a kind rotation
+        # get whole point of each center position of a kind rotation, and add it to the 10th column of centerlist
         whole_point = -45*centerlist[3] + 34*centerlist[4] - 32*centerlist[5] - 98*centerlist[6] -79*centerlist[7] -34*centerlist[8]
-        # whole_point = -centerlist[3] + 2*centerlist[4] - centerlist[5] - centerlist[6] -4*centerlist[7] -centerlist[3]
         
-        centerlist.append(whole_point)    # whole_point 作为表中第十列
+        
+        centerlist.append(whole_point)
 
-    # choose the optimal block with rotation and center:
+    # choose the optimal block with rotation and center, the one with highest scores
     largest_point_block = centerList[0]
     for centerlist in centerList:
         if centerlist[9] >= largest_point_block[9]:
             largest_point_block = centerlist
 
-    # point_list = []
-    # for centerlist in centerList:
-    #     point_list.append(centerlist[9])
-        
-    #     max_index = point_list.index(max(point_list))
-    
-    # largest_point_block = centerList[max_index]
-
-    # 返回块种类，块的旋转方式ID，块落在坐标系中的坐标(dlt_x, dlt_y), 块的原始点
+    # return the type of blocks, rotation type, (dlt_x, dlt_y) to move, and start point of the block
     return largest_point_block[0], largest_point_block[1], largest_point_block[2], block_dir[largest_point_block[0]][largest_point_block[1]]
-# print(judging_nextstep(done_area))
-# raise Exception
+
+
 # Define block shapes and shapes after rotation
 T = [[(-1, -3), (0, -3), (1, -3), (0, -4)],
      [(0, -4), (0, -3), (1, -3), (0, -2)],
@@ -238,14 +255,21 @@ blocks = [T, Z, S, I, L, J, O]
 colors = [(174, 99, 120), (19, 131, 194), (253, 143, 82), (148, 180, 71), (185, 194, 227), (196, 128, 98), (240, 166, 179)]
 
 # Define the game board
+# The size of small square is 25 x 25
 cell_size = 25
+# The game board has 10 columns
 columns = 10
+# The game board has 25 rows
 rows = 25
+# The line draw on the screen is 1 mm thick
 line = 1
+# The size of game board
 board_width = columns * (cell_size + line) + line
 board_height = rows * (cell_size + line) + line
+# The size of the whole screen window
 screen_width = 500
 screen_height = 800
+# The coordinate of the game board on the screen
 board_start_x = (screen_width - board_width) // 2
 board_start_y = screen_height - board_height
 fps = 60
@@ -299,6 +323,20 @@ def button_return(screen, text, x, y, func):
 
 
 def display_screen(screen):
+    '''
+    This function is to setting all the elements that will show on the home page and
+    draw the background.
+
+    **Parameters**
+
+        screen: *object*
+            the out put of pygame window
+
+    **Output**
+
+       All the texts that will be shown on the screen
+    '''
+
     screen.fill((252, 230, 201))
     pygame.draw.rect(screen, (255, 250, 250),pygame.Rect(50, 100, board_width, board_height))
     for x in range(columns + 1):
@@ -557,3 +595,12 @@ def main():
         if pygame.time.get_ticks() >= time:
             time += move_time
             screen_block.falling()
+<<<<<<< HEAD
+
+
+
+
+
+# main()
+=======
+>>>>>>> d0f67327f2c84cb0e92debf280237785e99ace55
