@@ -2,11 +2,6 @@ import copy
 import random
 import pygame
 from numpy import *
-from pygame.locals import KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN
-
-# columns = 10    # screen wide
-# rows = 25    # screen height
-
 
 def judging_centers(done_area, block_shape):
     block_dir = {
@@ -195,7 +190,6 @@ def judging_centers(done_area, block_shape):
         # whole_point = -centerlist[3] + 2*centerlist[4] - centerlist[5] - centerlist[6] -4*centerlist[7] -centerlist[3]
         
         centerlist.append(whole_point)    # whole_point 作为表中第十列
-        print(centerlist)
 
     # choose the optimal block with rotation and center:
     largest_point_block = centerList[0]
@@ -210,7 +204,6 @@ def judging_centers(done_area, block_shape):
     #     max_index = point_list.index(max(point_list))
     
     # largest_point_block = centerList[max_index]
-    print(largest_point_block)
 
     # 返回块种类，块的旋转方式ID，块落在坐标系中的坐标(dlt_x, dlt_y), 块的原始点
     return largest_point_block[0], largest_point_block[1], largest_point_block[2], block_dir[largest_point_block[0]][largest_point_block[1]]
@@ -257,8 +250,50 @@ fps = 60
 
 
 def game_text(screen, font, x, y, text, color):
-    text = font.render('AI Tetris', 1, (139, 28, 98))
+    text = font.render(text, 1, color)
     screen.blit(text, (x, y))
+
+
+def button_return(screen, text, x, y, func):
+    '''
+    This function is to create a "return" button used in each level game page. By clicking the "return" button, the
+    screen will jump back to the home page.
+
+    **Parameters**
+        screen: *object*
+            the out put of pygame window
+        text: *string*
+            the content shown on the button
+        x: *int*
+            the x coordinate of the button position
+        y: *int*
+            the y coordinate of the button position
+        func: *function*
+            the function that will be executed by clicking the button, and it will
+            run the home page function
+
+    **Output**
+
+        the buttons will be shown and worked on each level game page
+    '''
+    # Use pygame.mouse module get the position of mouse
+    mouse1 = pygame.mouse.get_pos()
+    font_level_small = pygame.font.SysFont('Arial', 25)
+    font_level_large = pygame.font.SysFont('Arial', 30)
+    w = int(font_level_small.size(text)[0])
+    h = int(font_level_small.size(text)[1])
+    if x < mouse1[0] < x + w and y < mouse1[1] < y + h:
+        # larger and dark blue button
+        game_text(screen, font_level_large, x, y, text, (56, 82, 132))
+        '''
+        Using get_pressed module to get the state of mouse left button. When player click the button,
+        this function will return a True value to execute the home page function.
+        '''
+        if pygame.mouse.get_pressed()[0]:
+            func()
+    else:
+        # smaller and light blue button
+        game_text(screen, font_level_small, x, y, text, (90, 167, 167))
 
 
 def display_screen(screen):
@@ -271,6 +306,16 @@ def display_screen(screen):
     pygame.font.init()
     font1 = pygame.font.SysFont('arial', 60)
     font2 = pygame.font.SysFont('arial', 72)  # bigger font for "GAME OVER"
+    font_2 = pygame.font.SysFont('Arial', 20)
+    bg_cor1 = (50 + 11 * (cell_size + line), 100)
+    bg_width = 5 * (cell_size + line) + line
+    bg_height = 2 * (cell_size + line) + line
+    font_width = int(font_2.size("Next Block")[0])
+    font_height = int(font_2.size("Next Block")[1])
+    font_x = bg_cor1[0] + (bg_width - font_width) / 2
+    font_y = bg_cor1[1] + (bg_height - font_height) / 2
+    game_text(screen, font_2, font_x, font_y + 20, "Next Block", (104, 149, 191))
+    # button_return(screen, "return", 75 + 11 * (cell_size + line), 675, player.Home_page)
 
 
 def creat_block():
@@ -326,12 +371,38 @@ class Blocks(object):
     ex_color = []
     whole_cor = []
 
-    def creat_new_block(self):   
-        new_Block = creat_block()
-        new_block = new_Block[1]
-            # self.block = new_block
-            # new_shape = new_Block[1]
-            
+    def create_next(self):
+        N_block = creat_block()
+        next_block = N_block[0]
+        next_shape = N_block[1]
+        self.next_block = next_block
+        self.next_shape = next_shape
+        # get the initial index of every new blocks for further block rotation function
+        self.next_block_id = self.next_shape.index(self.next_block)
+        new_color_ind = random.choice(len(colors))
+        new_color = colors[new_color_ind]
+        self.next_color = new_color
+        return self.next_block, self.next_shape, self.next_block_id, self.next_color
+
+    def draw_next(self, screen):
+        bg_cor1 = (50 + 11 * (cell_size + line), 175)
+        bg_width = 5 * (cell_size + line) + line
+        bg_height = 7 * (cell_size + line) + line
+        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1], bg_width, bg_height))
+        for sq in self.next_block:
+            line_corn1 = (50 + (sq[0] + 13) * (cell_size + line), 100 + (sq[1] + 9) * (cell_size + line))
+            line_corn2 = (50 + (sq[0] + 14) * (cell_size + line), 100 + (sq[1] + 9) * (cell_size + line))
+            line_corn3 = (50 + (sq[0] + 14) * (cell_size + line), 100 + (sq[1] + 10) * (cell_size + line))
+            line_corn4 = (50 + (sq[0] + 13) * (cell_size + line), 100 + (sq[1] + 10) * (cell_size + line))
+            corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
+            pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
+            pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
+            pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
+            pygame.draw.line(screen, (0, 0, 0), line_corn4, line_corn1)
+            pygame.draw.rect(screen, self.next_color, pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
+
+    def creat_new_block(self):
+        new_block = self.next_shape
         d_x = judging_centers(self.done_area, new_block)[2][0]
         block_cor = judging_centers(self.done_area, new_block)[3]
         new_cor = []
@@ -341,19 +412,9 @@ class Blocks(object):
             n_y = co[1]
             new_cor.append((n_x, n_y))         
         self.block = new_cor
-
-
         self.block_shape = new_cor
-        # new_Block = creat_block()
-        # new_block = new_Block[0]
-        # self.block = new_block
-        # new_shape = new_Block[1]
-        # self.block_shape = new_shape
-        # # get the initial index of every new blocks for further block rotation function
-        # self.block_id = self.block_shape.index(self.block)
-        new_color_ind = random.choice(len(colors))
-        new_color = colors[new_color_ind]
-        self.color = new_color
+        self.color = self.next_color
+        self.create_next()
         return self.block, self.color, self.block_shape
 
     def falling(self):
@@ -361,7 +422,8 @@ class Blocks(object):
         if self.chk_move(0, 1):
             if self.chk_overlap(0, 1):
                 self.move(0, 1)
-
+                game = 1
+                return game
             else:
                 '''
                 First, check whether the current block will overlap with the block below 
@@ -374,12 +436,23 @@ class Blocks(object):
                         self.done_area.append(bol)
                     self.clear_row()
                     self.creat_new_block()
+                    game = 1
+                    return game
+                else:
+                    for bol in self.block:
+                        # Add the last block to done_area list
+                        self.ex_color.append(self.color)
+                        self.done_area.append(bol)
+                    game = 2
+                    return game
         else:
             for bol in self.block:
                 self.ex_color.append(self.color)
                 self.done_area.append(bol)
             self.clear_row()
             self.creat_new_block()
+            game = 1
+            return game
 
     def key_control(self, del_x, del_y):
         if self.chk_move(del_x, del_y):
@@ -417,6 +490,24 @@ class Blocks(object):
                 for i in done_temp:
                     self.done_area.append(i)
 
+    def draw_score(self, screen):
+        bg_cor1 = (50 + 11 * (cell_size + line), 400)
+        bg_width = 5 * (cell_size + line) + line
+        bg_height = 2 * (cell_size + line) + line
+        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1] + 55, bg_width, bg_height))
+        font_2 = pygame.font.SysFont('Arial', 20)
+        font_3 = pygame.font.SysFont('Cambria Math', 24)
+        font_width = int(font_2.size("Score")[0])
+        font_height = int(font_2.size("Score")[1])
+        font_x = bg_cor1[0] + (bg_width - font_width) / 2
+        font_y = bg_cor1[1] + 30
+        font_width_s = int(font_3.size('Score: %d' % (self.clear_num * 100))[0])
+        font_height_s = int(font_3.size('Score: %d' % (self.clear_num * 100))[1])
+        font_x_s = bg_cor1[0] + (bg_width - font_width_s) / 2
+        font_y_s = font_y + font_height_s + 25
+        game_text(screen, font_2, font_x, font_y, "Score", (104, 149, 191))
+        game_text(screen, font_3, font_x_s, font_y_s + 2, 'Score: %d' % (self.clear_num * 100), (178, 34, 34))
+
     def draw_block(self, cell_size, line, screen):
         if self.falling:
             for sq in self.block:
@@ -452,10 +543,9 @@ def main():
     block = Block[0]
     block_shape = Block[1]
     block_id = Block[2]
-
-
     screen_block = Blocks(block, block_shape, block_id)
-    move_time = 30
+    screen_block.create_next()
+    move_time = 100
     time = pygame.time.get_ticks() + move_time
     while True:
         for event in pygame.event.get():
@@ -464,7 +554,9 @@ def main():
                 exit()
             
         display_screen(screen)
+        screen_block.draw_score(screen)
         screen_block.draw_block(cell_size, line, screen)
+        screen_block.draw_next(screen)
         pygame.display.update()
         if pygame.time.get_ticks() >= time:
             time += move_time

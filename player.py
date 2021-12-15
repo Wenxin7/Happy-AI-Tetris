@@ -2,8 +2,9 @@ import random
 import pygame
 from numpy import *
 from pygame.locals import KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN, K_SPACE, K_RETURN
+import tetris_ai_optimize
 
-# Define block shapes and shapes after rotation
+# Define the coordination of different block shapes and shapes after rotation
 T = [[(-1, -3), (0, -3), (1, -3), (0, -4)],
      [(0, -4), (0, -3), (1, -3), (0, -2)],
      [(-1, -3), (0, -3), (1, -3), (0, -2)],
@@ -23,31 +24,190 @@ J = [[(0, -5), (0, -4), (0, -3), (-1, -3)],
      [(0, -1), (0, -2), (0, -3), (1, -3)],
      [(-2, -3), (-1, -3), (0, -3), (0, -2)]]
 O = [[(-1, -4), (-1, -3), (0, -4), (0, -3)]]
+# The reward block is for the game reward
 reward = [[(0, -3)]]
+# Shape name of the block
 blocks = [T, Z, S, I, L, J, O]
 
 # Define the color
 colors = [(174, 99, 120), (19, 131, 194), (253, 143, 82), (148, 180, 71), (185, 194, 227), (196, 128, 98), (240, 166, 179)]
 
-# Define the game board
+# Define all the parameters of the game board
+# The size of small square is 25 x 25
 cell_size = 25
+# The game board has 10 columns
 columns = 10
+# The game board has 25 rows
 rows = 25
+# The line draw on the screen is 1 mm thick
 line = 1
+# The size of game board
 board_width = columns * (cell_size + line) + line
 board_height = rows * (cell_size + line) + line
+# The size of the whole screen window
 screen_width = 500
 screen_height = 800
+# The coordinate of the game board on the screen
 board_start_x = (screen_width - board_width) // 2
 board_start_y = screen_height - board_height
 
 
 def game_text(screen, font, x, y, message, color):
+    '''
+    This function is for displaying the text on the window screen in certain font, position and color
+
+    **Parameters**
+
+        screen: *object*
+            the out put of pygame window
+        font: *object*
+            the font style and size of the text
+        x: *int*
+            x coordination of the text position
+        y: *int*
+            y coordination of the text position
+        message: *string*
+            the content of the text that will show on the screen
+        color: *tuple*
+            the color of the text
+    **Output**
+
+        The text will show on the screen
+    '''
     text = font.render(message, 1, color)
     screen.blit(text, (x, y))
 
 
+def home_display(screen):
+    '''
+    This function is to setting all the elements that will show on the home page and
+    draw the background.
+
+    **Parameters**
+
+        screen: *object*
+            the out put of pygame window
+
+    **Output**
+
+       All the texts that will be shown on the screen
+    '''
+    # The colour of the home page background
+    screen.fill((252, 230, 201))
+    # Set the font style and size of the game title
+    font_title = pygame.font.SysFont('Arial', 60)
+    # Get the size of the title for calculating the location coordinate
+    font_title_x = int(font_title.size("Happy AI Tetris")[0])
+    font_title_y = int(font_title.size("Happy AI Tetris")[1])
+    # The title will show in the middle of the width of the screen.
+    x = (screen_width - font_title_x)/2
+    y = 75
+    game_text(screen, font_title, x, y, "Happy AI Tetris", (19, 131, 194))
+
+
+def button_home(screen, text, level, func):
+    '''
+    This function is to create buttons used in the home page. By clicking the certain button, the
+    screen will jump to the corresponding game level.
+
+    **Parameters**
+        screen: *object*
+            the out put of pygame window
+        text: *string*
+            the content shown on the button
+        level: *int*
+            the number used to control the y distance of different level button
+        func: *function*
+            the function that will be executed by clicking the button, and it will
+            run the corresponding game level
+
+    **Output**
+
+        the buttons will be shown and worked on the home page screen
+    '''
+    # Use pygame.mouse module get the position of mouse
+    mouse = pygame.mouse.get_pos()
+    # Set the font style of normal button text
+    font_level_small = pygame.font.SysFont('Arial', 30)
+    # Set the font style of the button text when mouse is within the button area
+    # The font is bigger than normal state when mouse pointing to the button
+    font_level_large = pygame.font.SysFont('Arial', 35)
+    # Do the calculation for locating the button
+    w = int(font_level_small.size(text)[0])
+    h = int(font_level_small.size(text)[1])
+    x = (screen_width - w)/2
+    y = 200 + 100 * level
+    '''
+    When mouse is not pointing to the button, the button shows in smaller font and in light blue.
+    When mouse is pointing to the button, the button will be larger and become dark blue
+    '''
+    if x < mouse[0] < x + w and y < mouse[1] < y + h:
+        # larger and dark blue button
+        game_text(screen, font_level_large, x, y, text, (56, 82, 132))
+        '''
+        Using get_pressed module to get the state of mouse left button. When player click the button,
+        this function will return a True value to execute the game function.
+        '''
+        if pygame.mouse.get_pressed()[0]:
+            func()
+    else:
+        # smaller and light blue button
+        game_text(screen, font_level_small, x, y, text, (90, 167, 167))
+
+
+def button_return(screen, text, x, y, func):
+    '''
+    This function is to create a "return" button used in each level game page. By clicking the "return" button, the
+    screen will jump back to the home page.
+
+    **Parameters**
+        screen: *object*
+            the out put of pygame window
+        text: *string*
+            the content shown on the button
+        x: *int*
+            the x coordinate of the button position
+        y: *int*
+            the y coordinate of the button position
+        func: *function*
+            the function that will be executed by clicking the button, and it will
+            run the home page function
+
+    **Output**
+
+        the buttons will be shown and worked on each level game page
+    '''
+    # Use pygame.mouse module get the position of mouse
+    mouse1 = pygame.mouse.get_pos()
+    font_level_small = pygame.font.SysFont('Arial', 25)
+    font_level_large = pygame.font.SysFont('Arial', 30)
+    w = int(font_level_small.size(text)[0])
+    h = int(font_level_small.size(text)[1])
+    if x < mouse1[0] < x + w and y < mouse1[1] < y + h:
+        # larger and dark blue button
+        game_text(screen, font_level_large, x, y, text, (56, 82, 132))
+        '''
+        Using get_pressed module to get the state of mouse left button. When player click the button,
+        this function will return a True value to execute the home page function.
+        '''
+        if pygame.mouse.get_pressed()[0]:
+            func()
+    else:
+        # smaller and light blue button
+        game_text(screen, font_level_small, x, y, text, (90, 167, 167))
+
+
 def Home_page():
+    '''
+    This function is for displaying home page of the game window
+
+    **Parameters**
+        None
+
+    **Output**
+
+        All the texts, buttons and background are shown on the screen
+    '''
     pygame.init()
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption('Happy AI Tetris')
@@ -57,61 +217,43 @@ def Home_page():
                 pygame.quit()
                 exit()
         home_display(screen)
-        button_home(screen, "level 1", 1, level_1)
-        button_home(screen, "level 2", 2, level_2)
-        button_home(screen, "level 3", 3, level_3)
+        button_home(screen, "Level 1", 1, level_1)
+        button_home(screen, "Level 2", 2, level_2)
+        button_home(screen, "Level 3", 3, level_3)
+        button_home(screen, "AI Tetris", 4, tetris_ai_optimize.main)
         button_home(screen, "Quit", 4, quit_game)
         pygame.display.update()
 
 
-def home_display(screen):
-    screen.fill((252, 230, 201))
-    font_title = pygame.font.SysFont('Arial', 60)
-    font_title_x = int(font_title.size("Happy AI Tetris")[0])
-    font_title_y = int(font_title.size("Happy AI Tetris")[1])
-    x = (screen_width - font_title_x)/2
-    y = 75
-    game_text(screen, font_title, x, y, "Happy AI Tetris", (19, 131, 194))
-
-
-def button_home(screen, text, level, func):
-    mouse = pygame.mouse.get_pos()
-    # click1 = pygame.mouse.get_pressed()
-    font_level_small = pygame.font.SysFont('Arial', 30)
-    font_level_large = pygame.font.SysFont('Arial', 35)
-    w = int(font_level_small.size(text)[0])
-    h = int(font_level_small.size(text)[1])
-    x = (screen_width - w)/2
-    y = 200 + 100 * level
-    if x < mouse[0] < x + w and y < mouse[1] < y + h:
-        game_text(screen, font_level_large, x, y, text, (56, 82, 132))
-        if pygame.mouse.get_pressed()[0]:
-            func()
-    else:
-        game_text(screen, font_level_small, x, y, text, (90, 167, 167))
-
-
-def button_return(screen, text, x, y, func):
-    mouse1 = pygame.mouse.get_pos()
-    # click2 = pygame.mouse.get_pressed()
-    font_level_small = pygame.font.SysFont('Arial', 25)
-    font_level_large = pygame.font.SysFont('Arial', 30)
-    w = int(font_level_small.size(text)[0])
-    h = int(font_level_small.size(text)[1])
-    if x < mouse1[0] < x + w and y < mouse1[1] < y + h:
-        game_text(screen, font_level_large, x, y, text, (56, 82, 132))
-        if pygame.mouse.get_pressed()[0]:
-            func()
-    else:
-        game_text(screen, font_level_small, x, y, text, (90, 167, 167))
-
-
 def quit_game():
+    '''
+    This function is to execute quiting the game window
+
+    **Parameters**
+        None
+
+    **Output**
+
+        Quiting the window
+    '''
     pygame.quit()
     quit()
 
 
 def display_screen(screen):
+    '''
+    This function is to setting all the elements that will show on the home page and
+    draw the background.
+
+    **Parameters**
+
+        screen: *object*
+            the out put of pygame window
+
+    **Output**
+
+       All the texts that will be shown on the screen
+    '''
     screen.fill((252, 230, 201))
     pygame.draw.rect(screen, (255, 250, 250), pygame.Rect(50, 100, board_width, board_height))
     for x in range(columns + 1):
@@ -382,12 +524,12 @@ class Blocks(object):
         font_height = int(font_2.size("Score")[1])
         font_x = bg_cor1[0] + (bg_width - font_width) / 2
         font_y = bg_cor1[1] + 30
-        font_width_s = int(font_3.size('Score:%05d' % (self.clear_num * 100))[0])
-        font_height_s = int(font_3.size('Score:%05d' % (self.clear_num * 100))[1])
+        font_width_s = int(font_3.size('Score: %d' % (self.clear_num * 100))[0])
+        font_height_s = int(font_3.size('Score: %d' % (self.clear_num * 100))[1])
         font_x_s = bg_cor1[0] + (bg_width - font_width_s) / 2
         font_y_s = font_y + font_height_s + 25
         game_text(screen, font_2, font_x, font_y, "Score", (104, 149, 191))
-        game_text(screen, font_3, font_x_s, font_y_s, 'Score:%05d' % (self.clear_num * 100), (178, 34, 34))
+        game_text(screen, font_3, font_x_s, font_y_s + 2, 'Score: %d' % (self.clear_num * 100), (178, 34, 34))
 
     def draw_block(self, cell_size, line, screen):
         if self.falling:
