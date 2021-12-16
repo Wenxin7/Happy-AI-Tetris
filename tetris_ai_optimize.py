@@ -280,48 +280,6 @@ def game_text(screen, font, x, y, text, color):
     screen.blit(text, (x, y))
 
 
-def button_return(screen, text, x, y, func):
-    '''
-    This function is to create a "return" button used in each level game page. By clicking the "return" button, the
-    screen will jump back to the home page.
-
-    **Parameters**
-        screen: *object*
-            the out put of pygame window
-        text: *string*
-            the content shown on the button
-        x: *int*
-            the x coordinate of the button position
-        y: *int*
-            the y coordinate of the button position
-        func: *function*
-            the function that will be executed by clicking the button, and it will
-            run the home page function
-
-    **Output**
-
-        the buttons will be shown and worked on each level game page
-    '''
-    # Use pygame.mouse module get the position of mouse
-    mouse1 = pygame.mouse.get_pos()
-    font_level_small = pygame.font.SysFont('Arial', 25)
-    font_level_large = pygame.font.SysFont('Arial', 30)
-    w = int(font_level_small.size(text)[0])
-    h = int(font_level_small.size(text)[1])
-    if x < mouse1[0] < x + w and y < mouse1[1] < y + h:
-        # larger and dark blue button
-        game_text(screen, font_level_large, x, y, text, (56, 82, 132))
-        '''
-        Using get_pressed module to get the state of mouse left button. When player click the button,
-        this function will return a True value to execute the home page function.
-        '''
-        if pygame.mouse.get_pressed()[0]:
-            func()
-    else:
-        # smaller and light blue button
-        game_text(screen, font_level_small, x, y, text, (90, 167, 167))
-
-
 def display_screen(screen):
     '''
     This function is to setting all the elements that will show on the home page and
@@ -355,7 +313,6 @@ def display_screen(screen):
     font_x = bg_cor1[0] + (bg_width - font_width) / 2
     font_y = bg_cor1[1] + (bg_height - font_height) / 2
     game_text(screen, font_2, font_x, font_y + 20, "Next Block", (104, 149, 191))
-    button_return(screen, "return", 75 + 11 * (cell_size + line), 675, player.Home_page)
 
 
 def creat_block():
@@ -579,15 +536,29 @@ def main():
     screen_block.create_next()
     screen_block.done_area = []
     screen_block.ex_color = []
+    font_level_small = pygame.font.SysFont('Arial', 25)
+    font_level_large = pygame.font.SysFont('Arial', 30)
+    w = int(font_level_small.size("return")[0])
+    h = int(font_level_small.size("return")[1])
+    x = 75 + 11 * (cell_size + line)
+    y = 675
     move_time = 30
     time = pygame.time.get_ticks() + move_time
     while True:
         for event in pygame.event.get():
+            mouse = pygame.mouse.get_pos()
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if x < mouse[0] < x + w and y < mouse[1] < y + h:
+                    player.Home_page()
         display_screen(screen)
+        mouse = pygame.mouse.get_pos()
+        if x < mouse[0] < x + w and y < mouse[1] < y + h:
+            game_text(screen, font_level_large, x, y, "return", (56, 82, 132))
+        else:
+            game_text(screen, font_level_small, x, y, "return", (90, 167, 167))
         screen_block.draw_score(screen)
         screen_block.draw_block(cell_size, line, screen)
         screen_block.draw_next(screen)
@@ -595,3 +566,9 @@ def main():
         if pygame.time.get_ticks() >= time:
             time += move_time
             screen_block.falling()
+<<<<<<< HEAD
+
+
+
+=======
+>>>>>>> 8686da26af80616e6b3b3a2a6e6ab980bb1c95f3
