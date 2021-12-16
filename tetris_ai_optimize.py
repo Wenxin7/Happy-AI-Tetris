@@ -579,7 +579,7 @@ def main():
     screen_block.create_next()
     screen_block.done_area = []
     screen_block.ex_color = []
-    move_time = 100
+    move_time = 30
     time = pygame.time.get_ticks() + move_time
     while True:
         for event in pygame.event.get():

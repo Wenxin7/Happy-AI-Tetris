@@ -1,7 +1,7 @@
 import random
 import pygame
 from numpy import *
-from pygame.locals import KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN, K_SPACE, K_RETURN
+from pygame.locals import KEYDOWN, K_LEFT, K_RIGHT, K_UP, K_DOWN, K_SPACE, K_RETURN, MOUSEBUTTONDOWN
 import tetris_ai_optimize
 
 # Define the coordination of different block shapes and shapes after rotation
@@ -126,33 +126,34 @@ def button_home(screen, text, level, func):
         the buttons will be shown and worked on the home page screen
     '''
     # Use pygame.mouse module get the position of mouse
-    mouse = pygame.mouse.get_pos()
-    # Set the font style of normal button text
-    font_level_small = pygame.font.SysFont('Arial', 30)
-    # Set the font style of the button text when mouse is within the button area
-    # The font is bigger than normal state when mouse pointing to the button
-    font_level_large = pygame.font.SysFont('Arial', 35)
-    # Do the calculation for locating the button
-    w = int(font_level_small.size(text)[0])
-    h = int(font_level_small.size(text)[1])
-    x = (screen_width - w)/2
-    y = 200 + 100 * level
+    # mouse = pygame.mouse.get_pos()
+    # # Set the font style of normal button text
+    # font_level_small = pygame.font.SysFont('Arial', 30)
+    # # Set the font style of the button text when mouse is within the button area
+    # # The font is bigger than normal state when mouse pointing to the button
+    # font_level_large = pygame.font.SysFont('Arial', 35)
+    # # Do the calculation for locating the button
+    # w = int(font_level_small.size(text)[0])
+    # h = int(font_level_small.size(text)[1])
+    # x = (screen_width - w)/2
+    # y = 200 + 100 * level
     '''
     When mouse is not pointing to the button, the button shows in smaller font and in light blue.
     When mouse is pointing to the button, the button will be larger and become dark blue
     '''
-    if x < mouse[0] < x + w and y < mouse[1] < y + h:
-        # larger and dark blue button
-        game_text(screen, font_level_large, x, y, text, (56, 82, 132))
-        '''
-        Using get_pressed module to get the state of mouse left button. When player click the button,
-        this function will return a True value to execute the game function.
-        '''
-        if pygame.mouse.get_pressed()[0]:
-            func()
-    else:
-        # smaller and light blue button
-        game_text(screen, font_level_small, x, y, text, (90, 167, 167))
+    # if x < mouse[0] < x + w and y < mouse[1] < y + h:
+    #     # larger and dark blue button
+    #     game_text(screen, font_level_large, x, y, text, (56, 82, 132))
+    #     '''
+    #     Using get_pressed module to get the state of mouse left button. When player click the button,
+    #     this function will return a True value to execute the game function.
+    #     '''
+    #
+    #     if event.type == pygame.MOUSEBUTTONDOWN:
+    #         func()
+    # else:
+    #     # smaller and light blue button
+    #     game_text(screen, font_level_small, x, y, text, (90, 167, 167))
 
 
 def button_return(screen, text, x, y, func):
@@ -190,11 +191,16 @@ def button_return(screen, text, x, y, func):
         Using get_pressed module to get the state of mouse left button. When player click the button,
         this function will return a True value to execute the home page function.
         '''
-        if pygame.mouse.get_pressed()[0]:
-            func()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    func()
+
     else:
         # smaller and light blue button
-        game_text(screen, font_level_small, x, y, text, (90, 167, 167))
+        if x < mouse1[0] < x + w and y < mouse1[1] < y + h:
+            game_text(screen, font_level_large, x, y, text, (56, 82, 132))
+            game_text(screen, font_level_small, x, y, text, (90, 167, 167))
 
 
 def Home_page():
@@ -211,17 +217,71 @@ def Home_page():
     pygame.init()
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption('Happy AI Tetris')
+    # Set the font style of normal button text
+    font_level_small = pygame.font.SysFont('Arial', 30)
+    # Set the font style of the button text when mouse is within the button area
+    # The font is bigger than normal state when mouse pointing to the button
+    font_level_large = pygame.font.SysFont('Arial', 35)
+    # Do the calculation for locating the button
+    w_1 = int(font_level_small.size("Level 1")[0])
+    h_1 = int(font_level_small.size("Level 1")[1])
+    x_1 = (screen_width - w_1) / 2
+    y_1 = 200 + 100 * 1
+    w_2 = int(font_level_small.size("Level 2")[0])
+    h_2 = int(font_level_small.size("Level 2")[1])
+    x_2 = (screen_width - w_2) / 2
+    y_2 = 200 + 100 * 2
+    w_3 = int(font_level_small.size("Level 3")[0])
+    h_3 = int(font_level_small.size("Level 3")[1])
+    x_3 = (screen_width - w_3) / 2
+    y_3 = 200 + 100 * 3
+    w_ai = int(font_level_small.size("AI Tetris")[0])
+    h_ai = int(font_level_small.size("AI Tetris")[1])
+    x_ai = (screen_width - w_ai) / 2
+    y_ai = 200 + 100 * 4
+    w_q = int(font_level_small.size("Quit")[0])
+    h_q = int(font_level_small.size("Quit")[1])
+    x_q = (screen_width - w_q) / 2
+    y_q = 200 + 100 * 5
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+            mouse = pygame.mouse.get_pos()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if x_1 < mouse[0] < x_1 + w_1 and y_1 < mouse[1] < y_1 + h_1:
+                    level_1()
+                if x_2 < mouse[0] < x_2 + w_2 and y_2 < mouse[1] < y_2 + h_2:
+                    level_2()
+                if x_3 < mouse[0] < x_3 + w_3 and y_3 < mouse[1] < y_3 + h_3:
+                    level_3()
+                if x_ai < mouse[0] < x_ai + w_ai and y_ai < mouse[1] < y_ai + h_ai:
+                    tetris_ai_optimize.main()
+                if x_q < mouse[0] < x_q + w_q and y_q < mouse[1] < y_q + h_q:
+                    quit_game()
         home_display(screen)
-        button_home(screen, "Level 1", 1, level_1)
-        button_home(screen, "Level 2", 2, level_2)
-        button_home(screen, "Level 3", 3, level_3)
-        button_home(screen, "AI Tetris", 4, tetris_ai_optimize.main)
-        button_home(screen, "Quit", 5, quit_game)
+        mouse = pygame.mouse.get_pos()
+        if x_1 < mouse[0] < x_1 + w_1 and y_1 < mouse[1] < y_1 + h_1:
+            game_text(screen, font_level_large, x_1, y_1, "Level 1", (56, 82, 132))
+        else:
+            game_text(screen, font_level_small, x_1, y_1, "Level 1", (90, 167, 167))
+        if x_2 < mouse[0] < x_2 + w_2 and y_2 < mouse[1] < y_2 + h_2:
+            game_text(screen, font_level_large, x_2, y_2, "Level 2", (56, 82, 132))
+        else:
+            game_text(screen, font_level_small, x_2, y_2, "Level 2", (90, 167, 167))
+        if x_3 < mouse[0] < x_3 + w_3 and y_3 < mouse[1] < y_3 + h_3:
+            game_text(screen, font_level_large, x_3, y_3, "Level 3", (56, 82, 132))
+        else:
+            game_text(screen, font_level_small, x_3, y_3, "Level 3", (90, 167, 167))
+        if x_ai < mouse[0] < x_ai + w_ai and y_ai < mouse[1] < y_ai + h_ai:
+            game_text(screen, font_level_large, x_ai, y_ai, "AI Tetris", (56, 82, 132))
+        else:
+            game_text(screen, font_level_small, x_ai, y_ai, "AI Tetris", (90, 167, 167))
+        if x_q < mouse[0] < x_q + w_q and y_q < mouse[1] < y_q + h_q:
+            game_text(screen, font_level_large, x_q, y_q, "Quit", (56, 82, 132))
+        else:
+            game_text(screen, font_level_small, x_q, y_q, "Quit", (90, 167, 167))
         pygame.display.update()
 
 
@@ -289,7 +349,7 @@ def display_screen(screen):
     Using the button_return function defined before to create a button on the lower right corner of the 
     screen. When player click the return button, the page will jump back to home page
     '''
-    button_return(screen, "return", 75 + 11 * (cell_size + line), 675, Home_page)
+    # button_return(screen, "return", 75 + 11 * (cell_size + line), 675, Home_page)
 
 
 def creat_block():
@@ -370,18 +430,76 @@ class Blocks(object):
         return True
 
     def chk_move(self, del_x, del_y):
+        '''
+        This function is for checking whether the current block landed on the bottom
+        of the board or out of the x range of the board. To check the block can continue to move or not.
+
+        **Parameters**
+
+            del_x: *int*
+                The move step of the block in x direction.
+            del_y: *int*
+                The move step of the block in y direction.
+
+        **Output**
+
+           valid: *bool*
+                Whether the movement are valid (True) or not (False).
+        '''
         for sq in self.block:
+            # Check the feasibility by checking the position of grids one by one.
             if sq[1] + del_y > 22 or sq[0] + del_x < -4 or sq[0] + del_x > 5:
+                '''
+                If any one of the grid in the block will get out of the board range after the 
+                delta x and delta y move step, return False.
+                '''
                 return False
+        # After the loop, if there is no grid that will be out of the range, return True
         return True
 
     def chk_overlap(self, del_x, del_y):
+        '''
+        This function is for checking whether the current block will overlap with landed blocks or not.
+
+        **Parameters**
+
+            del_x: *int*
+                The move step of the block in x direction.
+            del_y: *int*
+                The move step of the block in y direction.
+
+        **Output**
+
+           valid: *bool*
+                Whether the overlap are True or not (False).
+        '''
         for sq in self.block:
+            # Check the feasibility by checking the position of grids one by one.
             if (sq[0] + del_x, sq[1] + del_y) in self.done_area:
+                '''
+                If any one of the grid in the block will overlap with the grids landed 
+                in the done list after the delta x and delta y move step, return False.
+                This means the block cannot move this step.
+                '''
                 return False
         return True
 
     def chk_over(self):
+        '''
+        This function is for checking whether the current block has reach the top of the board or not.
+
+        **Parameters**
+
+            del_x: *int*
+                The move step of the block in x direction.
+            del_y: *int*
+                The move step of the block in y direction.
+
+        **Output**
+
+           valid: *bool*
+                Whether the overlap are True or not (False).
+        '''
         # check whether there are done blocks already in the top row
         for sq in self.block:
             if sq[1] <= -2:
@@ -635,12 +753,19 @@ def level_1():
     screen_block1.create_next()
     screen_block1.done_area = []
     screen_block1.ex_color = []
+    font_level_small = pygame.font.SysFont('Arial', 25)
+    font_level_large = pygame.font.SysFont('Arial', 30)
+    w = int(font_level_small.size("return")[0])
+    h = int(font_level_small.size("return")[1])
+    x = 75 + 11 * (cell_size + line)
+    y = 675
     move_time = 500
     time = pygame.time.get_ticks() + move_time
     game = 1
     pause = False
     while True:
         for event in pygame.event.get():
+            mouse = pygame.mouse.get_pos()
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
@@ -671,10 +796,19 @@ def level_1():
                         screen_block.ex_color = []
                         screen_block.create_next()
                         game = 1
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if x < mouse[0] < x + w and y < mouse[1] < y + h:
+                    Home_page()
         display_screen(screen)
+        mouse = pygame.mouse.get_pos()
+        if x < mouse[0] < x + w and y < mouse[1] < y + h:
+            game_text(screen, font_level_large, x, y, "return", (56, 82, 132))
+        else:
+            game_text(screen, font_level_small, x, y, "return", (90, 167, 167))
         screen_block1.draw_score(screen)
         screen_block1.draw_block(cell_size, line, screen)
         screen_block1.draw_next(screen)
+        mouse = pygame.mouse.get_pos()
         if game == 2:
             over_font = pygame.font.Font(None, 60)
             restart_font = pygame.font.Font(None, 40)
