@@ -566,9 +566,4 @@ def main():
         if pygame.time.get_ticks() >= time:
             time += move_time
             screen_block.falling()
-<<<<<<< HEAD
 
-
-
-=======
->>>>>>> 8686da26af80616e6b3b3a2a6e6ab980bb1c95f3
