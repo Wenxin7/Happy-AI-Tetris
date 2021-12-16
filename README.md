@@ -23,7 +23,8 @@ This python file import Pygame package to realize the design and display of game
 game level in the start interface. First three levels require people to play themselves and later level would
 be more challenging than the former level. The forth level would be AI level. Pressing the button will allow 
 people to enter the game interface, and press return could get back to the start interface. While people playing
-the first 3 level, they could stop by pressing space button.
+the first 3 level, they could stop by pressing space button. To enter each game level or return the home page,
+you need to double click the button.
 
 ## Contributing
 
