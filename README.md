@@ -11,7 +11,8 @@ the blocks.
 
 ## Install
 
-Download or cloen the repository from the wibsite run the file "player.py" directly.
+Download or cloen the repository from the wibsite. Firstly, install pygame package. Then, run the file
+"player.py" directly.
 
 ```
 python3 player.py
