@@ -103,16 +103,10 @@ def judging_centers(done_area, block_shape):
         for w in range(-4, 6):
             for h in range(25, 0, -1):
                 if (wrong_position(given_block_type, rotation_type, (w, h)) == False) and \
-<<<<<<< HEAD
-                (wrong_position(given_block_type, rotation_type, (w, h+1)) == True):
-                    
-                        centerList.append([given_block_type, rotation_type, (w, h)])
-=======
                         (wrong_position(given_block_type, rotation_type, (w, h+1)) == True):
 
                     centerList.append(
                         [given_block_type, rotation_type, (w, h)])
->>>>>>> 8cf0531a7065cfa2819628fe593090471427c7b6
 
     # delete the invalid possibilities
 
@@ -329,15 +323,48 @@ def display_screen(screen):
 
 
 def creat_block():
-    block_shape = random.choice(blocks)
-    block = block_shape[0]
-    block_id = block_shape.index(block)
+    '''
+    This function is for creating new blocks
 
+    **Parameters**
+        None
+
+    **Output**
+
+        block: *list*
+            each coordinate of four grids in this block
+        block_shape: *list*
+            the shape name of the block. eg. T, O, L, S
+            the letter variable is the list which includes all coordinates of the
+            initial shapes and shapes after rotation.
+        block_id: *int*
+            the index of newly created block in the corresponding block list.
+    '''
+    # Random choice from all kinds of block shape list
+    block_shape = random.choice(blocks)
+    # The newly created block's initial direction will always be the first one in the corresponding block list
+    block = block_shape[0]
+    # Store the index as block_id for further rotation function
+    block_id = block_shape.index(block)
     return block, block_shape, block_id
 
 
 class Blocks(object):
+    '''
+    This class create a wrapper for functions which implement all the operations for tetris blocks,
+    including movement, rotation, create new block after landing and eliminating rows when a row is full.
+    Also, it has some checking functions to check whether some certain operation can be done or not.
+    The functions of drawing blocks are also included.
+
+    **Parameters**
+
+        list and int: *block* and *block_shape* and *block_id*
+            Each coordinate of four grids in this block. The letter variable is the
+            list which includes all coordinates of the initial shapes and shapes after rotation.
+            The index of newly created block in the corresponding block list.
+    '''
     def __init__(self, block, block_shape,  block_id):
+        # The color of each block will be chosen by random choice from color list.
         self.color_ind = random.choice(len(colors))
         self.color = colors[self.color_ind]
         self.block_shape = block_shape
@@ -349,18 +376,64 @@ class Blocks(object):
         return self.block
 
     def chk_move(self, del_x, del_y):
+        '''
+        This function is for checking whether the current block landed on the bottom
+        of the board or out of the x range of the board. To check the block can continue to move or not.
+
+        **Parameters**
+
+            del_x: *int*
+                The move step of the block in x direction.
+            del_y: *int*
+                The move step of the block in y direction.
+
+        **Output**
+
+           valid: *bool*
+                Whether the movement are valid (True) or not (False).
+        '''
         for sq in self.block:
             if sq[1] + del_y > 22 or sq[0] + del_x < -4 or sq[0] + del_x > 5:
                 return False
         return True
 
     def chk_overlap(self, del_x, del_y):
+        '''
+        This function is for checking whether the current block will overlap with landed blocks or not.
+
+        **Parameters**
+
+            del_x: *int*
+                The move step of the block in x direction.
+            del_y: *int*
+                The move step of the block in y direction.
+
+        **Output**
+
+           valid: *bool*
+                Whether the overlap are True or not (False).
+        '''
         for sq in self.block:
             if (sq[0] + del_x, sq[1] + del_y) in self.done_area:
                 return False
         return True
 
     def chk_over(self):
+        '''
+        This function is for checking whether the current block has reach the top of the board or not.
+
+        **Parameters**
+
+            del_x: *int*
+                The move step of the block in x direction.
+            del_y: *int*
+                The move step of the block in y direction.
+
+        **Output**
+
+           valid: *bool*
+                Whether the overlap are True or not (False).
+        '''
         # check whether there are done blocks already in the top row
         for sq in self.block:
             if sq[1] <= -2:
@@ -368,6 +441,22 @@ class Blocks(object):
         return True
 
     def move(self, del_x, del_y):
+        '''
+        This function is to implement the movement of the blocks.
+
+        **Parameters**
+
+            del_x: *int*
+                The move step of the block in x direction.
+            del_y: *int*
+                The move step of the block in y direction.
+
+        **Output**
+
+           block: *list*
+                The block after certain movement.
+        '''
+
         new_block = []
         for pos in self.block:
             new_x = pos[0] + del_x
@@ -382,6 +471,24 @@ class Blocks(object):
     whole_cor = []
 
     def create_next(self):
+        '''
+        This function is for creating a next block when current block is falling. The next block will
+        be shown as a preview.
+
+        **Parameters**
+            None
+
+        **Output**
+
+            next_block: *list*
+                each coordinate of four grids in newly created block
+            next_shape: *list*
+                the shape name of the newly created block. eg. T, O, L, S
+            next_block_id: *int*
+                the index of newly created block in the corresponding block list.
+            next_color: *tuple*
+                the color of newly created block
+        '''
         N_block = creat_block()
         next_block = N_block[0]
         next_shape = N_block[1]
@@ -395,12 +502,31 @@ class Blocks(object):
         return self.next_block, self.next_shape, self.next_block_id, self.next_color
 
     def draw_next(self, screen):
+        '''
+        This function is to draw the next block on the upper right side of the game screen as preview.
+
+        **Parameters**
+
+            screen: *object*
+                the out put of pygame screen window
+
+        **Output**
+
+           The preview of next block with certain color that will be shown on the screen
+        '''
+        # Calculate the position of white rectangle background of the next block preview part
         bg_cor1 = (50 + 11 * (cell_size + line), 175)
+        # Calculate the size of white rectangle background of the next block preview part
+        
         bg_width = 5 * (cell_size + line) + line
         bg_height = 7 * (cell_size + line) + line
+        # Draw the white rectangle background on the upper right side of the game screen
+        
         pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(
             bg_cor1[0], bg_cor1[1], bg_width, bg_height))
         for sq in self.next_block:
+            # Draw the lines of the block
+
             line_corn1 = (50 + (sq[0] + 13) * (cell_size + line),
                           100 + (sq[1] + 9) * (cell_size + line))
             line_corn2 = (50 + (sq[0] + 14) * (cell_size + line),
@@ -410,6 +536,8 @@ class Blocks(object):
             line_corn4 = (50 + (sq[0] + 13) * (cell_size + line),
                           100 + (sq[1] + 10) * (cell_size + line))
             corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
+            # Fill all the square grids with corresponding color
+            
             pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
             pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
             pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
@@ -418,6 +546,22 @@ class Blocks(object):
                 corn1[0], corn1[1], cell_size, cell_size))
 
     def creat_new_block(self):
+        '''
+        This function is for creating new block after last block land. In this game, The block created by
+        create_next() function will be passed to the showing block.
+
+        **Parameters**
+            None
+
+        **Output**
+
+            block: *list*
+                each coordinate of four grids in the coming block
+            shape: *list*
+                the shape name of the coming block. eg. T, O, L, S
+            color: *tuple*
+                the color of the coming block
+        '''
         new_block = self.next_shape
         d_x = judging_centers(self.done_area, new_block)[2][0]
         block_cor = judging_centers(self.done_area, new_block)[3]
@@ -434,9 +578,24 @@ class Blocks(object):
         return self.block, self.color, self.block_shape
 
     def falling(self):
+        '''
+        This function is to implement the falling of blocks.
 
+        **Parameters**
+            None
+
+        **Output**
+
+            game: *int*
+                It returns two numbers,1 and 2. 1 means the game is still running, while the 2 means the
+                game is over.
+        '''
         if self.chk_move(0, 1):
+            # Check whether the block has landed or not
+
             if self.chk_overlap(0, 1):
+                # Check whether the block will over lap with landed block or not
+                # Move 1 step in y direction once.
                 self.move(0, 1)
             else:
                 '''
@@ -445,10 +604,20 @@ class Blocks(object):
                 the game will stop.
                 '''
                 if self.chk_over():
+                    '''
+                    If the current block won't be out of the top range, then the block will landed on
+                    the previous block.
+                    '''
                     for bol in self.block:
+                        # Store the block position and corresponding color in to done_area and ex_color list.
+
                         self.ex_color.append(self.color)
                         self.done_area.append(bol)
+                    # Check whether need to remove a full row after the block landed.
+                    
                     self.clear_row()
+                    # After landing, show the new block.
+
                     self.creat_new_block()
                 else:
                     for bol in self.block:
@@ -456,15 +625,41 @@ class Blocks(object):
                         self.ex_color.append(self.color)
                         self.done_area.append(bol)
         else:
+            '''
+            If the current block has already landed on the bottom of the board, then the block and it's color
+            will be stored in corresponding lists.
+            '''
             for bol in self.block:
                 self.ex_color.append(self.color)
                 self.done_area.append(bol)
+            # Check whether need to remove a full row after the block landed.
+            
             self.clear_row()
+            # After landing, show the new block.
+
             self.creat_new_block()
 
     def key_control(self, del_x, del_y):
+        '''
+        This function is to implement the movement in left or right direction of the blocks.
+
+        **Parameters**
+
+            del_x: *int*
+                The move step of the block in x direction.
+            del_y: *int*
+                The move step of the block in y direction.
+
+        **Output**
+
+           The operation of the block.
+        '''
         if self.chk_move(del_x, del_y):
+            # Check whether the block has landed or not
+
             if self.chk_overlap(del_x, del_y):
+                # Check whether the block will overlap with landed block or not
+                # Then move the block by certain step
                 self.move(del_x, del_y)
 
     def chk_clear(self, list1, list2):
@@ -601,7 +796,3 @@ def main():
         if pygame.time.get_ticks() >= time:
             time += move_time
             screen_block.falling()
-<<<<<<< HEAD
-
-=======
->>>>>>> 8cf0531a7065cfa2819628fe593090471427c7b6
