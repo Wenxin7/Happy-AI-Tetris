@@ -728,82 +728,133 @@ class Blocks(object):
                     self.done_area.append(i)
 
     def draw_score(self, screen):
+        '''
+        This function is to setting the score and it's white background which will show on the
+        right side of the screen.
+
+        **Parameters**
+
+            screen: *object*
+                the out put of pygame screen window
+
+        **Output**
+
+           All the texts and graphics that will be shown on the screen
+        '''
+        # Calculate the position of white rectangle background of the next block preview part
         bg_cor1 = (50 + 11 * (cell_size + line), 400)
         bg_width = 5 * (cell_size + line) + line
         bg_height = 2 * (cell_size + line) + line
-        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(
-            bg_cor1[0], bg_cor1[1] + 55, bg_width, bg_height))
+        # Draw the white rectangle background on the upper right side of the game screen
+        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1] + 55, bg_width, bg_height))
+        # Set the font style and size of the score title and score number
         font_2 = pygame.font.SysFont('Arial', 20)
         font_3 = pygame.font.SysFont('Cambria Math', 24)
+        # Get the size of the title and number for calculating the location coordinate
         font_width = int(font_2.size("Score")[0])
         font_height = int(font_2.size("Score")[1])
         font_x = bg_cor1[0] + (bg_width - font_width) / 2
         font_y = bg_cor1[1] + 30
-        font_width_s = int(font_3.size('Score: %d' %
-                           (self.clear_num * 100))[0])
-        font_height_s = int(font_3.size('Score: %d' %
-                            (self.clear_num * 100))[1])
+        font_width_s = int(font_3.size('Score: %d' % (self.clear_num * 100))[0])
+        font_height_s = int(font_3.size('Score: %d' % (self.clear_num * 100))[1])
         font_x_s = bg_cor1[0] + (bg_width - font_width_s) / 2
         font_y_s = font_y + font_height_s + 25
+        # The title and score will show in the certain position.
         game_text(screen, font_2, font_x, font_y, "Score", (104, 149, 191))
-        game_text(screen, font_3, font_x_s, font_y_s + 2, 'Score: %d' %
-                  (self.clear_num * 100), (178, 34, 34))
+        game_text(screen, font_3, font_x_s, font_y_s + 2, 'Score: %d' % (self.clear_num * 100), (178, 34, 34))
 
     def draw_block(self, cell_size, line, screen):
+        '''
+        This function is to draw all the landed blocks and falling blocks with corrsponding colors
+        which will show on the game board.
+
+        **Parameters**
+
+            screen: *object*
+                the out put of pygame screen window
+            cell_size: *int*
+                the length of the single grid side
+            line: *int*
+                the thickness of the lines
+
+        **Output**
+
+           All block graphics will be shown on the screen
+        '''
         if self.falling:
             for sq in self.block:
-                line_corn1 = (
-                    50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
-                line_corn2 = (
-                    50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
-                line_corn3 = (
-                    50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
-                line_corn4 = (
-                    50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
+                # Calculate the coordinate of four corner of each square grid
+                line_corn1 = (50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
+                line_corn2 = (50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
+                line_corn3 = (50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
+                line_corn4 = (50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
+                # The color fulfill will inside the line-drawn outline.
                 corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
+                # Draw the outlines and draw squares for filling corresponding color.
                 pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
                 pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
                 pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
                 pygame.draw.line(screen, (0, 0, 0), line_corn4, line_corn1)
-                pygame.draw.rect(screen, self.color, pygame.Rect(
-                    corn1[0], corn1[1], cell_size, cell_size))
+                pygame.draw.rect(screen, self.color, pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
             for pot in self.done_area:
-                line_corn1 = (
-                    50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
-                line_corn2 = (
-                    50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
-                line_corn3 = (
-                    50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 3) * (cell_size + line))
-                line_corn4 = (
-                    50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
+                # Calculate the coordinate of four corner of each square grid
+                line_corn1 = (50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
+                line_corn2 = (50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
+                line_corn3 = (50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 3) * (cell_size + line))
+                line_corn4 = (50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
+                # The color fulfill will inside the line-drawn outline.
                 corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
+                # Draw the outlines and draw squares for filling corresponding color.
                 pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
                 pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
                 pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
                 pygame.draw.line(screen, (0, 0, 0), line_corn4, line_corn1)
-                pygame.draw.rect(screen, self.ex_color[self.done_area.index(
-                    pot)], pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
+                # self.ex_color[self.done_area.index(pot)] is able to return the corresponding color of certain block.
+                pygame.draw.rect(screen, self.ex_color[self.done_area.index(pot)], pygame.Rect(corn1[0], corn1[1],
+                                                                                               cell_size, cell_size))
 
 
 def main():
+    '''
+    This function is to execute the game page and start the game.
+
+    **Parameters**
+
+        None
+
+    **Output**
+
+       The game will initialized and start.
+    '''
     # Initialize the screen
     pygame.init()
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption('Happy AI Tetris')
+    # Create an initial block
     Block = creat_block()
     block = Block[0]
     block_shape = Block[1]
     block_id = Block[2]
+    # Using the Blocks class
     screen_block = Blocks(block, block_shape, block_id)
     screen_block.create_next()
+    # Create a "next block" as preview
+    # Reset the game for each time re-enter the game
     screen_block.done_area = []
     screen_block.ex_color = []
+    # Set the fonts and position for the "return" button on the lower right corner of the board
+    '''
+    The "return" button used in each level game page. By clicking the "return" button, the 
+    screen will jump back to the home page.
+    '''
     font_level_small = pygame.font.SysFont('Arial', 25)
     font_level_large = pygame.font.SysFont('Arial', 30)
     w = int(font_level_small.size("return")[0])
     h = int(font_level_small.size("return")[1])
     x = 75 + 11 * (cell_size + line)
     y = 675
+    # move time is used to control the falling speed of the block
+    # Eg. the block will move once every 30 milliseconds
     move_time = 30
     time = pygame.time.get_ticks() + move_time
     while True:
@@ -813,18 +864,27 @@ def main():
                 pygame.quit()
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                '''
+               Create a button on the lower right corner of the screen.
+                When player click the return button, the page will jump back to home page
+               '''
                 if x < mouse[0] < x + w and y < mouse[1] < y + h:
+                    # The position of the mouse has to be in the button area
                     player.Home_page()
+        # Display all the elements on the screen
         display_screen(screen)
         mouse = pygame.mouse.get_pos()
+        # The "return" button is similar to the buttons on the home page.
         if x < mouse[0] < x + w and y < mouse[1] < y + h:
             game_text(screen, font_level_large, x, y, "return", (56, 82, 132))
         else:
             game_text(screen, font_level_small, x, y, "return", (90, 167, 167))
+        # Show the score and all the blocks on the screen
         screen_block.draw_score(screen)
         screen_block.draw_block(cell_size, line, screen)
         screen_block.draw_next(screen)
         pygame.display.update()
         if pygame.time.get_ticks() >= time:
+            # The block will fall one step evey "move_time" gap.
             time += move_time
             screen_block.falling()
