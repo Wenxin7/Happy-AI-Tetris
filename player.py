@@ -106,53 +106,6 @@ def home_display(screen):
     game_text(screen, font_title, x, y, "Happy AI Tetris", (19, 131, 194))
 
 
-def button_return(screen, text, x, y, func):
-    '''
-    This function is to create a "return" button used in each level game page. By clicking the "return" button, the
-    screen will jump back to the home page.
-
-    **Parameters**
-        screen: *object*
-            the out put of pygame window
-        text: *string*
-            the content shown on the button
-        x: *int*
-            the x coordinate of the button position
-        y: *int*
-            the y coordinate of the button position
-        func: *function*
-            the function that will be executed by clicking the button, and it will
-            run the home page function
-
-    **Output**
-
-        the buttons will be shown and worked on each level game page
-    '''
-    # # Use pygame.mouse module get the position of mouse
-    # mouse1 = pygame.mouse.get_pos()
-    # font_level_small = pygame.font.SysFont('Arial', 25)
-    # font_level_large = pygame.font.SysFont('Arial', 30)
-    # w = int(font_level_small.size(text)[0])
-    # h = int(font_level_small.size(text)[1])
-    # if x < mouse1[0] < x + w and y < mouse1[1] < y + h:
-    #     # larger and dark blue button
-    #     game_text(screen, font_level_large, x, y, text, (56, 82, 132))
-    #     '''
-    #     Using get_pressed module to get the state of mouse left button. When player click the button,
-    #     this function will return a True value to execute the home page function.
-    #     '''
-    #     while True:
-    #         for event in pygame.event.get():
-    #             if event.type == pygame.MOUSEBUTTONDOWN:
-    #                 func()
-    #
-    # else:
-    #     # smaller and light blue button
-    #     if x < mouse1[0] < x + w and y < mouse1[1] < y + h:
-    #         game_text(screen, font_level_large, x, y, text, (56, 82, 132))
-    #         game_text(screen, font_level_small, x, y, text, (90, 167, 167))
-
-
 def Home_page():
     '''
     This function is for displaying home page of the game window
@@ -291,9 +244,11 @@ def display_screen(screen):
     pygame.draw.rect(screen, (255, 250, 250), pygame.Rect(50, 100, board_width, board_height))
     # Draw all the column and row lines to generate grid board for playing tetris
     for x in range(columns + 1):
-        pygame.draw.line(screen, (0, 0, 0), (50 + x * (cell_size + line), 100), (50 + x * (cell_size + line), board_height + 99))
+        pygame.draw.line(screen, (0, 0, 0), (50 + x * (cell_size + line), 100),
+                         (50 + x * (cell_size + line), board_height + 99))
     for y in range(rows + 1):
-        pygame.draw.line(screen, (0, 0, 0), (50, y * (cell_size + line) + 100), (board_width + 49, y * (cell_size + line) + 100))
+        pygame.draw.line(screen, (0, 0, 0), (50, y * (cell_size + line) + 100),
+                         (board_width + 49, y * (cell_size + line) + 100))
     # Adding pause hint on the left side of the screen
     pygame.font.init()
     font_1 = pygame.font.SysFont('Arial', 12)
@@ -957,6 +912,17 @@ class Blocks(object):
 
 
 def level_1():
+    '''
+    This function is to execute the level1 game page and start the game.
+
+    **Parameters**
+
+        None
+
+    **Output**
+
+       The game will initialized and start.
+    '''
     # Initialize the screen
     pygame.init()
     screen = pygame.display.set_mode((screen_width, screen_height))
@@ -1012,35 +978,53 @@ def level_1():
                     if game == 1 and not pause:
                         screen_block1.key_control(0, 1)
                 elif event.key == K_UP:
+                    # The block will do one rotation.
                     if game == 1 and not pause:
                         screen_block1.rotation()
                 elif event.key == K_SPACE:
+                    # The pause value will switch between True and False to control the pausing.
                     if game == 1:
                         pause = not pause
                 elif event.key == K_RETURN:
+                    # After press return key button, the game state will change from 2 to 1.
+                    # When game is 2, it means the game is over. So if it change to 1, the game will restart.
                     if game == 2:
+                        # Execute the same process as the beginning og the game.
                         Block = creat_block()
                         block = Block[0]
                         block_shape = Block[1]
                         block_id = Block[2]
                         screen_block = Blocks(block, block_shape, block_id)
+                        # After restarting the game, the done_area and color list need to be reset.
                         screen_block.done_area = []
                         screen_block.ex_color = []
                         screen_block.create_next()
                         game = 1
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                '''
+                Create a button on the lower right corner of the screen.
+                 When player click the return button, the page will jump back to home page
+                '''
                 if x < mouse[0] < x + w and y < mouse[1] < y + h:
+                    # The position of the mouse has to be in the button area
                     Home_page()
+        # Display all the elements on the screen
         display_screen(screen)
         mouse = pygame.mouse.get_pos()
+        # The "return" button is similar to the buttons on the home page.
         if x < mouse[0] < x + w and y < mouse[1] < y + h:
             game_text(screen, font_level_large, x, y, "return", (56, 82, 132))
         else:
             game_text(screen, font_level_small, x, y, "return", (90, 167, 167))
+        # Show the score and all the blocks on the screen
         screen_block1.draw_score(screen)
         screen_block1.draw_block(cell_size, line, screen)
         screen_block1.draw_next(screen)
         mouse = pygame.mouse.get_pos()
+        '''
+        If game is over, the "Game Over" will show in the middle of the screen. And "Press Enter to restart game"
+        will show up to remind player.
+        '''
         if game == 2:
             over_font = pygame.font.Font(None, 60)
             restart_font = pygame.font.Font(None, 40)
@@ -1048,15 +1032,30 @@ def level_1():
             game_text(screen, over_font, 75, 250, "Game Over", black)
             game_text(screen, restart_font, 75, 375, "Press Enter to restart game", (226, 90, 83))
         pygame.display.update()
+        # If the game id paused, the time control condition will always keeps the same with real time.
+        # So that the block will not move with real time passing during the pause time.
         if pause:
             time = pygame.time.get_ticks()
         if pygame.time.get_ticks() >= time:
             if game == 1 and not pause:
+                # The block will fall one step evey "move_time" gap.
                 time = pygame.time.get_ticks() + move_time
                 game = screen_block1.falling()
 
 
 def level_2():
+    '''
+    This function is to execute the level2 game page and start the game. Level2 function is similar to level1,
+    but it is added extra function to increase the difficulty.
+
+    **Parameters**
+
+        None
+
+    **Output**
+
+       The game will initialized and start.
+    '''
     # Initialize the screen
     pygame.init()
     screen = pygame.display.set_mode((screen_width, screen_height))
@@ -1146,6 +1145,18 @@ def level_2():
 
 
 def level_3():
+    '''
+    This function is to execute the level3 game page and start the game. Level3 function is similar to level1,
+    but it is added extra function to increase the difficulty.
+
+    **Parameters**
+
+        None
+
+    **Output**
+
+       The game will initialized and start.
+    '''
     # Initialize the screen
     pygame.init()
     screen = pygame.display.set_mode((screen_width, screen_height))
@@ -1213,7 +1224,12 @@ def level_3():
         screen_block3.draw_score(screen)
         screen_block3.draw_block(cell_size, line, screen)
         screen_block3.draw_next(screen)
-        if (screen_block3.clear_num * 1000) % 2000 == 0 and screen_block3.clear_num != 0:
+        '''
+        In level 3, For every 5 rows of blocks the player removes, this function will execute extra_row() function.
+        In this way, A new row lacking a grid on most right side will show up from the bottom to increase the height
+        of the done area. In another word, the difficulty is increased.
+        '''
+        if (screen_block3.clear_num * 1000) % 5000 == 0 and screen_block3.clear_num != 0:
             screen_block3.extra_row()
             screen_block3.clear_num += 1
         if game == 2:
