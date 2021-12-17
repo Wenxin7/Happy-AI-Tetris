@@ -74,7 +74,8 @@ def judging_centers(done_area, block_shape):
                 delta x and delta y, which is the difference of final position and start point
 
         **Output**
-            validity of the fallen position
+            valid: *bool*
+                validity of the fallen position
         '''
 
         all_block_position = [(cube[0] + fall_position[0], cube[1] + fall_position[1])
@@ -663,14 +664,41 @@ class Blocks(object):
                 self.move(del_x, del_y)
 
     def chk_clear(self, list1, list2):
+        '''
+        This function is for checking whether all elements in list1 are also in list 2 or not.
+
+        **Parameters**
+
+            list1: *list*
+                A list has several blocks.
+            list2: *list*
+                A list has several blocks.
+
+        **Output**
+
+           valid: *bool*
+                Whether the including relationship are True or not (False).
+        '''
         for i in list1:
+            # If any one element in the list1 is not in the list2, return False.
             if i not in list2:
                 return False
         return True
 
+    # Define a clear_num variable for removed rows counting.
     clear_num = 0
 
     def clear_row(self):
+        '''
+        This function is to remove the row which is full of blocks.
+
+        **Parameters**
+            None
+
+        **Output**
+
+            The full row will be removed and all the landed blocks beyond this row will move downward.
+        '''
         for y in range(-2, 23):
             row = []
             for x in range(-4, 6):
@@ -683,11 +711,15 @@ class Blocks(object):
             if self.chk_clear(row, self.done_area):
                 # record the row number of the row that will be cleared.
                 row_done = row[0][1]
+                # Remove the blocks in the row and corresponding color of each block from their storing lists.
                 for i in row:
                     self.ex_color.pop(self.done_area.index(i))
                     self.done_area.remove(i)
+                # Counting the number of removed rows for further score calculation.
                 self.clear_num += 1
+                # Define the score judge variable as the standard for reward and difficulty increasing judgement.
                 done_temp = []
+                # Move all the blocks beyond removed row downward.
                 for bl in self.done_area[:]:
                     if bl[1] < row_done:
                         done_temp.append((bl[0], bl[1] + 1))
