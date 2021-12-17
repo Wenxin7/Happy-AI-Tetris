@@ -11,7 +11,7 @@ the blocks.
 
 ## Install
 
-Download or cloen the repository from the wibsite run the file "player.py" directly.
+Download or cloen the repository from the wibsite. Firstly, make sure you have already installed pygame package. Then, run the file "player.py" directly.
 
 ```
 python3 player.py
@@ -22,9 +22,9 @@ python3 player.py
 This python file import Pygame package to realize the design and display of game interface. There are four
 game level in the start interface. First three levels require people to play themselves and later level would
 be more challenging than the former level. The forth level would be AI level. Pressing the button will allow 
-people to enter the game interface, and press return could get back to the start interface. While people playing
-the first 3 level, they could stop by pressing space button. To enter each game level or return the home page,
-you need to double click the button.
+people to enter the game interface, and press return could get back to the start interface. While people playingthe first 3 level, they could stop by pressing space button. To enter each game level or return the home page.
+
+> Note: If the operation system of your computer is MacOS, you need to double click all the operation button. If you are using a PC, click the operation buttons for one time would work.
 
 ## Contributing
 
