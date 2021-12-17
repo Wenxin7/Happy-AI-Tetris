@@ -30,7 +30,8 @@ reward = [[(0, -3)]]
 blocks = [T, Z, S, I, L, J, O]
 
 # Define the color
-colors = [(174, 99, 120), (19, 131, 194), (253, 143, 82), (148, 180, 71), (185, 194, 227), (196, 128, 98), (240, 166, 179)]
+colors = [(174, 99, 120), (19, 131, 194), (253, 143, 82), (148, 180, 71), (185, 194, 227), (196, 128, 98),
+          (240, 166, 179)]
 
 # Define all the parameters of the game board
 # The size of small square is 25 x 25
@@ -103,58 +104,6 @@ def home_display(screen):
     x = (screen_width - font_title_x)/2
     y = 75
     game_text(screen, font_title, x, y, "Happy AI Tetris", (19, 131, 194))
-
-
-def button_home(screen, text, level, func):
-    '''
-    This function is to create buttons used in the home page. By clicking the certain button, the
-    screen will jump to the corresponding game level.
-
-    **Parameters**
-        screen: *object*
-            the out put of pygame window
-        text: *string*
-            the content shown on the button
-        level: *int*
-            the number used to control the y distance of different level button
-        func: *function*
-            the function that will be executed by clicking the button, and it will
-            run the corresponding game level
-
-    **Output**
-
-        the buttons will be shown and worked on the home page screen
-    '''
-    # Use pygame.mouse module get the position of mouse
-    # mouse = pygame.mouse.get_pos()
-    # # Set the font style of normal button text
-    # font_level_small = pygame.font.SysFont('Arial', 30)
-    # # Set the font style of the button text when mouse is within the button area
-    # # The font is bigger than normal state when mouse pointing to the button
-    # font_level_large = pygame.font.SysFont('Arial', 35)
-    # # Do the calculation for locating the button
-    # w = int(font_level_small.size(text)[0])
-    # h = int(font_level_small.size(text)[1])
-    # x = (screen_width - w)/2
-    # y = 200 + 100 * level
-    '''
-    When mouse is not pointing to the button, the button shows in smaller font and in light blue.
-    When mouse is pointing to the button, the button will be larger and become dark blue
-    '''
-    # if x < mouse[0] < x + w and y < mouse[1] < y + h:
-    #     # larger and dark blue button
-    #     game_text(screen, font_level_large, x, y, text, (56, 82, 132))
-    #     '''
-    #     Using get_pressed module to get the state of mouse left button. When player click the button,
-    #     this function will return a True value to execute the game function.
-    #     '''
-    #
-    #     if event.type == pygame.MOUSEBUTTONDOWN:
-    #         func()
-    # else:
-    # larger and dark blue button
-    # smaller and light blue button
-    #     game_text(screen, font_level_small, x, y, text, (90, 167, 167))
 
 
 def button_return(screen, text, x, y, func):
@@ -552,11 +501,21 @@ class Blocks(object):
         # Record the x and y direction movement of the block and apply the same movement to the block after rotation
         del_x = self.block[0][0] - self.block_shape[index][0][0]
         del_y = self.block[0][1] - self.block_shape[index][0][1]
-        #
+        # Make sure that the index choice won't out of the number range of forms for same shape block
+        # Eg. if the block has 4 forms, then after rotating 4 times,
+        # the index will come back to 0 to get the first form.
         if index + 1 <= len(self.block_shape) - 1:
+            # Each rotation means the block form will change to the next list in the shape list.
             new_block = self.block_shape[index + 1]
+            '''
+            After changing the direction of the block, the form block will locate at the initial position defined
+            in the list, so it have to take the same step as the previous one. Then the block after rotation will
+            stay at the same place as it was before rotation. And store it in the ro_block list.
+            '''
             for sq in new_block:
                 ro_block.append((sq[0] + del_x, sq[1] + del_y))
+            # Check whether the rotation will have conflict with the Left and right boundaries.
+            # If not, pass the assignment to block and block_id variable in the class.
             if self.chk_rotation(ro_block):
                 self.block = ro_block
                 self.block_id = index + 1
@@ -569,32 +528,138 @@ class Blocks(object):
                 self.block_id = 0
         return self.block, self.block_id
 
-
     def move(self, del_x, del_y):
+        '''
+        This function is to implement the movement of the blocks.
+
+        **Parameters**
+
+            del_x: *int*
+                The move step of the block in x direction.
+            del_y: *int*
+                The move step of the block in y direction.
+
+        **Output**
+
+           block: *list*
+                The block after certain movement.
+        '''
+        # create an empty list for storing every squares in block after movement.
         new_block = []
         for pos in self.block:
+            # The x and y coordinate of the block plus delta x and delta y. It will implement the block moving.
             new_x = pos[0] + del_x
             new_y = pos[1] + del_y
             new_block.append((new_x, new_y))
+            # Pass the new_block list to block variable in the class.
             self.block = new_block
         return self.block
 
-    done_area = []  # fallen blocks
-    cur_block = None  # falling block
-    ex_color = []
-    whole_cor = []
-    NB = None
+    # Create some empty list for further use
+    done_area = []  # Fallen and landed blocks
+    cur_block = None  # Falling block
+    ex_color = []  # The colors of each block in the done_area list
+    whole_cor = []  # The coordinates of whole board
+
+    def chk_clear(self, list1, list2):
+        '''
+        This function is for checking whether all elements in list1 are also in list 2 or not.
+
+        **Parameters**
+
+            list1: *list*
+                A list has several blocks.
+            list2: *list*
+                A list has several blocks.
+
+        **Output**
+
+           valid: *bool*
+                Whether the including relationship are True or not (False).
+        '''
+        for i in list1:
+            # If any one element in the list1 is not in the list2, return False.
+            if i not in list2:
+                return False
+        return True
+
+    # Define a clear_num variable for removed rows counting.
+    clear_num = 0
+
+    def clear_row(self):
+        '''
+        This function is to remove the row which is full of blocks.
+
+        **Parameters**
+            None
+
+        **Output**
+
+            The full row will be removed and all the landed blocks beyond this row will move downward.
+        '''
+        for y in range(-2, 23):
+            row = []
+            for x in range(-4, 6):
+                row.append((x, y))
+            # generate all the coordinate of points into the whole coordinate list
+            self.whole_cor.append(row)
+            # To make sure each row in this list is arranged from bottom to top
+            self.whole_cor.reverse()
+        for row in self.whole_cor:
+            # using chk_clear() function to searching the row that is full of done blocks.
+            if self.chk_clear(row, self.done_area):
+                # record the row number of the row that will be cleared.
+                row_done = row[0][1]
+                # Remove the blocks in the row and corresponding color of each block from their storing lists.
+                for i in row:
+                    self.ex_color.pop(self.done_area.index(i))
+                    self.done_area.remove(i)
+                # Counting the number of removed rows for further score calculation.
+                self.clear_num += 1
+                # Define the score judge variable as the standard for reward and difficulty increasing judgement.
+                self.score_jug = self.clear_num * 1000
+                done_temp = []
+                # Move all the blocks beyond removed row downward.
+                for bl in self.done_area[:]:
+                    if bl[1] < row_done:
+                        done_temp.append((bl[0], bl[1] + 1))
+                        self.done_area.remove(bl)
+                for i in done_temp:
+                    self.done_area.append(i)
 
     def create_next(self):
+        '''
+        This function is for creating a next block when current block is falling. The next block will
+        be shown as a preview.
+
+        **Parameters**
+            None
+
+        **Output**
+
+            next_block: *list*
+                each coordinate of four grids in newly created block
+            next_shape: *list*
+                the shape name of the newly created block. eg. T, O, L, S
+            next_block_id: *int*
+                the index of newly created block in the corresponding block list.
+            next_color: *tuple*
+                the color of newly created block
+        '''
+        # In normal situation, the next block shape will be selected from normal block list.
         if self.clear_num % 5 != 0 or self.clear_num == 0:
-            # When clear row is not 5, 10, 15 and so on, the next block will be created in normal shape
+            # When clear row is not 5, 10, 15 and so on, the next block will be created in normal shape.
+            # Using creat_block() function to create next block.
             N_block = creat_block()
+            # Two return value from creat_block() function are stored in two variable and pass them to
+            # self.next_block and self.next_shape.
             next_block = N_block[0]
             next_shape = N_block[1]
             self.next_block = next_block
             self.next_shape = next_shape
             # get the initial index of every new blocks for further block rotation function
             self.next_block_id = self.next_shape.index(self.next_block)
+            # Give random color to this next block.
             new_color_ind = random.choice(len(colors))
             new_color = colors[new_color_ind]
             self.next_color = new_color
@@ -606,7 +671,9 @@ class Blocks(object):
             '''
             if self.score_jug % 5000 == 0:
                 # To make sure the reward block shows only once for each 500 score.
+                # Repeat the create process as creating normal blocks, but creating little single square.
                 next_block = reward[0]
+                # The block was chosen from "reward" list which only has one square grid.
                 next_shape = reward
                 self.next_block = next_block
                 self.next_shape = next_shape
@@ -614,9 +681,11 @@ class Blocks(object):
                 new_color_ind = random.choice(len(colors))
                 new_color = colors[new_color_ind]
                 self.next_color = new_color
+                # After adding 1,score_jug will not be divisible by 5000 even the number of removed row keeps % 5.
                 self.score_jug += 1
                 return self.next_block, self.next_shape, self.next_block_id, self.next_color
             else:
+                # Once creating a single square grid, the next block will be normal block again.
                 N_block = creat_block()
                 next_block = N_block[0]
                 next_shape = N_block[1]
@@ -630,16 +699,33 @@ class Blocks(object):
                 return self.next_block, self.next_shape, self.next_block_id, self.next_color
 
     def draw_next(self, screen):
+        '''
+        This function is to draw the next block on the upper right side of the game screen as preview.
+
+        **Parameters**
+
+            screen: *object*
+                the out put of pygame screen window
+
+        **Output**
+
+           The preview of next block with certain color that will be shown on the screen
+        '''
+        # Calculate the position of white rectangle background of the next block preview part
         bg_cor1 = (50 + 11 * (cell_size + line), 175)
+        # Calculate the size of white rectangle background of the next block preview part
         bg_width = 5 * (cell_size + line) + line
         bg_height = 7 * (cell_size + line) + line
+        # Draw the white rectangle background on the upper right side of the game screen
         pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1], bg_width, bg_height))
         for sq in self.next_block:
+            # Draw the lines of the block
             line_corn1 = (50 + (sq[0] + 13) * (cell_size + line), 100 + (sq[1] + 9) * (cell_size + line))
             line_corn2 = (50 + (sq[0] + 14) * (cell_size + line), 100 + (sq[1] + 9) * (cell_size + line))
             line_corn3 = (50 + (sq[0] + 14) * (cell_size + line), 100 + (sq[1] + 10) * (cell_size + line))
             line_corn4 = (50 + (sq[0] + 13) * (cell_size + line), 100 + (sq[1] + 10) * (cell_size + line))
             corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
+            # Fill all the square grids with corresponding color
             pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
             pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
             pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
@@ -647,31 +733,71 @@ class Blocks(object):
             pygame.draw.rect(screen, self.next_color, pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
 
     def create_new_block(self):
+        '''
+        This function is for creating new block after last block land. In this game, The block created by
+        create_next() function will be passed to the showing block.
+
+        **Parameters**
+            None
+
+        **Output**
+
+            block: *list*
+                each coordinate of four grids in the coming block
+            shape: *list*
+                the shape name of the coming block. eg. T, O, L, S
+            color: *tuple*
+                the color of the coming block
+        '''
+        # All the value returned by create_next() function will be passed to the coming block
         self.block = self.next_block
         self.block_shape = self.next_shape
         # get the initial index of every new blocks for further block rotation function
         self.block_id = self.next_block_id
         self.color = self.next_color
+        # After passing the values, a new next block need to be created.
         self.create_next()
         return self.block, self.color, self.block_shape
 
     def falling(self):
+        '''
+        This function is to implement the falling of blocks.
+
+        **Parameters**
+            None
+
+        **Output**
+
+            game: *int*
+                It returns two numbers,1 and 2. 1 means the game is still running, while the 2 means the
+                game is over.
+        '''
         if self.chk_move(0, 1):
+            # Check whether the block has landed or not
             if self.chk_overlap(0, 1):
+                # Check whether the block will over lap with landed block or not
+                # Move 1 step in y direction once.
                 self.move(0, 1)
                 game = 1
                 return game
             else:
                 '''
                 First, check whether the current block will overlap with the block below 
-                If the block overlap with the block below, and this block is already out of the game board area,
-                the game will stop.
+                If the block overlap with the block below, and this block is already out of top range 
+                of the game board area, which means game over, the game will stop and return 2.
                 '''
                 if self.chk_over():
+                    '''
+                    If the current block won't be out of the top range, then the block will landed on
+                    the previous block.
+                    '''
                     for bol in self.block:
+                        # Store the block position and corresponding color in to done_area and ex_color list.
                         self.ex_color.append(self.color)
                         self.done_area.append(bol)
+                    # Check whether need to remove a full row after the block landed.
                     self.clear_row()
+                    # After landing, show the new block.
                     self.create_new_block()
                     game = 1
                     return game
@@ -683,67 +809,90 @@ class Blocks(object):
                     game = 2
                     return game
         else:
+            '''
+            If the current block has already landed on the bottom of the board, then the block and it's color
+            will be stored in corresponding lists.
+            '''
             for bol in self.block:
                 self.ex_color.append(self.color)
                 self.done_area.append(bol)
+            # Check whether need to remove a full row after the block landed.
             self.clear_row()
+            # After landing, show the new block.
             self.create_new_block()
             game = 1
             return game
 
     def key_control(self, del_x, del_y):
+        '''
+        This function is to implement the movement in left or right direction of the blocks.
+
+        **Parameters**
+
+            del_x: *int*
+                The move step of the block in x direction.
+            del_y: *int*
+                The move step of the block in y direction.
+
+        **Output**
+
+           The operation of the block.
+        '''
         if self.chk_move(del_x, del_y):
+            # Check whether the block has landed or not
             if self.chk_overlap(del_x, del_y):
+                # Check whether the block will overlap with landed block or not
+                # Then move the block by certain step
                 self.move(del_x, del_y)
 
-    def chk_clear(self, list1, list2):
-        for i in list1:
-            if i not in list2:
-                return False
-        return True
-
-    clear_num = 0
-
-    def clear_row(self):
-        for y in range(-2, 23):
-            row = []
-            for x in range(-4, 6):
-                row.append((x, y))
-            self.whole_cor.append(row)  # generate all the coordinate of points into the whole coordinate list
-            self.whole_cor.reverse()  # To make sure each row in this list is arranged from bottom to top
-        for row in self.whole_cor:
-            if self.chk_clear(row, self.done_area):
-                # record the row number of the row that will be cleared.
-                row_done = row[0][1]
-                for i in row:
-                    self.ex_color.pop(self.done_area.index(i))
-                    self.done_area.remove(i)
-                self.clear_num += 1
-                self.score_jug = self.clear_num * 1000
-                done_temp = []
-                for bl in self.done_area[:]:
-                    if bl[1] < row_done:
-                        done_temp.append((bl[0], bl[1] + 1))
-                        self.done_area.remove(bl)
-                for i in done_temp:
-                    self.done_area.append(i)
-
     def extra_row(self):
+        '''
+        This function is to grow a new row lacking a grid on most right side from the bottom of the board.
+
+        **Parameters**
+            None
+
+        **Output**
+
+            A new row lacking a grid on most right side will show up from the bottom.
+        '''
         new_done = []
+        # Move all the landed blocks in the done_area list upwards for one step.
         for sq in self.done_area:
             new_done.append((sq[0], sq[1] - 1))
         self.done_area = new_done
+        # Adding a new row lacking a grid on most right side into the done_area list
         for x in range(-4, 5):
+            # Lacking one grid, so the x range is -4 to 4.
             self.done_area.append((x, 22))
+            # The new row will show in pink color.
             self.ex_color.append((240, 166, 179))
 
     def draw_score(self, screen):
+        '''
+        This function is to setting the score and it's white background which will show on the
+        right side of the screen.
+
+        **Parameters**
+
+            screen: *object*
+                the out put of pygame screen window
+
+        **Output**
+
+           All the texts and graphics that will be shown on the screen
+        '''
+        # Calculate the position of white rectangle background of the next block preview part
         bg_cor1 = (50 + 11 * (cell_size + line), 400)
+        # Calculate the size of white rectangle background of the next block preview part
         bg_width = 5 * (cell_size + line) + line
         bg_height = 2 * (cell_size + line) + line
+        # Draw the white rectangle background on the upper right side of the game screen
         pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1] + 55, bg_width, bg_height))
+        # Set the font style and size of the score title and score number
         font_2 = pygame.font.SysFont('Arial', 20)
         font_3 = pygame.font.SysFont('Cambria Math', 24)
+        # Get the size of the title and number for calculating the location coordinate
         font_width = int(font_2.size("Score")[0])
         font_height = int(font_2.size("Score")[1])
         font_x = bg_cor1[0] + (bg_width - font_width) / 2
@@ -752,33 +901,59 @@ class Blocks(object):
         font_height_s = int(font_3.size('Score: %d' % (self.clear_num * 100))[1])
         font_x_s = bg_cor1[0] + (bg_width - font_width_s) / 2
         font_y_s = font_y + font_height_s + 25
+        # The title and score will show in the certain position.
         game_text(screen, font_2, font_x, font_y, "Score", (104, 149, 191))
         game_text(screen, font_3, font_x_s, font_y_s + 2, 'Score: %d' % (self.clear_num * 100), (178, 34, 34))
 
     def draw_block(self, cell_size, line, screen):
+        '''
+        This function is to draw all the landed blocks and falling blocks with corrsponding colors
+        which will show on the game board.
+
+        **Parameters**
+
+            screen: *object*
+                the out put of pygame screen window
+            cell_size: *int*
+                the length of the single grid side
+            line: *int*
+                the thickness of the lines
+
+        **Output**
+
+           All block graphics will be shown on the screen
+        '''
         if self.falling:
             for sq in self.block:
+                # Calculate the coordinate of four corner of each square grid
                 line_corn1 = (50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
                 line_corn2 = (50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
                 line_corn3 = (50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
                 line_corn4 = (50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
+                # The color fulfill will inside the line-drawn outline.
                 corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
+                # Draw the outlines and draw squares for filling corresponding color.
                 pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
-                pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
+                pygame.draw.line(screen, (0, 0, 0), line_corn2,line_corn3)
                 pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
                 pygame.draw.line(screen, (0, 0, 0), line_corn4, line_corn1)
                 pygame.draw.rect(screen, self.color, pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
             for pot in self.done_area:
+                # Calculate the coordinate of four corner of each square grid
                 line_corn1 = (50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
                 line_corn2 = (50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
                 line_corn3 = (50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 3) * (cell_size + line))
                 line_corn4 = (50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
+                # The color fulfill will inside the line-drawn outline.
                 corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
+                # Draw the outlines and draw squares for filling corresponding color.
                 pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
                 pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
                 pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
                 pygame.draw.line(screen, (0, 0, 0), line_corn4, line_corn1)
-                pygame.draw.rect(screen, self.ex_color[self.done_area.index(pot)], pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
+                # self.ex_color[self.done_area.index(pot)] is able to return the corresponding color of certain block.
+                pygame.draw.rect(screen, self.ex_color[self.done_area.index(pot)], pygame.Rect(corn1[0], corn1[1],
+                                                                                               cell_size, cell_size))
 
 
 def level_1():
@@ -786,22 +961,34 @@ def level_1():
     pygame.init()
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption('Happy AI Tetris')
+    # Create an initial block
     Block = creat_block()
     block = Block[0]
     block_shape = Block[1]
     block_id = Block[2]
+    # Using the Blocks class
     screen_block1 = Blocks(block, block_shape, block_id)
+    # Create a "next block" as preview
     screen_block1.create_next()
+    # Reset the game for each time re-enter the game
     screen_block1.done_area = []
     screen_block1.ex_color = []
+    # Set the fonts and position for the "return" button on the lower right corner of the board
+    '''
+    The "return" button used in each level game page. By clicking the "return" button, the 
+    screen will jump back to the home page.
+    '''
     font_level_small = pygame.font.SysFont('Arial', 25)
     font_level_large = pygame.font.SysFont('Arial', 30)
     w = int(font_level_small.size("return")[0])
     h = int(font_level_small.size("return")[1])
     x = 75 + 11 * (cell_size + line)
     y = 675
+    # move time is used to control the falling speed of the block
+    # Eg. the block will move once every 500 milliseconds
     move_time = 500
     time = pygame.time.get_ticks() + move_time
+    # Initial game state
     game = 1
     pause = False
     while True:
@@ -810,14 +997,18 @@ def level_1():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+            # The keyboard operation
             elif event.type == pygame.KEYDOWN:
                 if event.key == K_LEFT:
+                    # The block will move one step to the left.
                     if game == 1 and not pause:
                         screen_block1.key_control(-1, 0)
                 elif event.key == K_RIGHT:
+                    # The block will move one step to the right.
                     if game == 1 and not pause:
                         screen_block1.key_control(1, 0)
                 elif event.key == K_DOWN:
+                    # The block will move one step downwards and speed the falling.
                     if game == 1 and not pause:
                         screen_block1.key_control(0, 1)
                 elif event.key == K_UP:

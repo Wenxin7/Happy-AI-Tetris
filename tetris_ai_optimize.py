@@ -102,7 +102,7 @@ def judging_centers(done_area, block_shape):
         for w in range(-4, 6):
             for h in range(25, 0, -1):
                 if (wrong_position(given_block_type, rotation_type, (w, h)) == False) and \
-                    (wrong_position(given_block_type, rotation_type, (w, h+1)) == True):
+                (wrong_position(given_block_type, rotation_type, (w, h+1)) == True):
                     
                         centerList.append([given_block_type, rotation_type, (w, h)])
 
@@ -566,9 +566,4 @@ def main():
         if pygame.time.get_ticks() >= time:
             time += move_time
             screen_block.falling()
-<<<<<<< HEAD
 
-
-
-=======
->>>>>>> 8686da26af80616e6b3b3a2a6e6ab980bb1c95f3
