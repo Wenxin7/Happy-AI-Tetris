@@ -364,6 +364,7 @@ class Blocks(object):
             list which includes all coordinates of the initial shapes and shapes after rotation.
             The index of newly created block in the corresponding block list.
     '''
+
     def __init__(self, block, block_shape,  block_id):
         # The color of each block will be chosen by random choice from color list.
         self.color_ind = random.choice(len(colors))
@@ -518,11 +519,11 @@ class Blocks(object):
         # Calculate the position of white rectangle background of the next block preview part
         bg_cor1 = (50 + 11 * (cell_size + line), 175)
         # Calculate the size of white rectangle background of the next block preview part
-        
+
         bg_width = 5 * (cell_size + line) + line
         bg_height = 7 * (cell_size + line) + line
         # Draw the white rectangle background on the upper right side of the game screen
-        
+
         pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(
             bg_cor1[0], bg_cor1[1], bg_width, bg_height))
         for sq in self.next_block:
@@ -538,7 +539,7 @@ class Blocks(object):
                           100 + (sq[1] + 10) * (cell_size + line))
             corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
             # Fill all the square grids with corresponding color
-            
+
             pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
             pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
             pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
@@ -615,7 +616,7 @@ class Blocks(object):
                         self.ex_color.append(self.color)
                         self.done_area.append(bol)
                     # Check whether need to remove a full row after the block landed.
-                    
+
                     self.clear_row()
                     # After landing, show the new block.
 
@@ -634,7 +635,7 @@ class Blocks(object):
                 self.ex_color.append(self.color)
                 self.done_area.append(bol)
             # Check whether need to remove a full row after the block landed.
-            
+
             self.clear_row()
             # After landing, show the new block.
 
@@ -746,7 +747,8 @@ class Blocks(object):
         bg_width = 5 * (cell_size + line) + line
         bg_height = 2 * (cell_size + line) + line
         # Draw the white rectangle background on the upper right side of the game screen
-        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1] + 55, bg_width, bg_height))
+        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(
+            bg_cor1[0], bg_cor1[1] + 55, bg_width, bg_height))
         # Set the font style and size of the score title and score number
         font_2 = pygame.font.SysFont('Arial', 20)
         font_3 = pygame.font.SysFont('Cambria Math', 24)
@@ -755,13 +757,16 @@ class Blocks(object):
         font_height = int(font_2.size("Score")[1])
         font_x = bg_cor1[0] + (bg_width - font_width) / 2
         font_y = bg_cor1[1] + 30
-        font_width_s = int(font_3.size('Score: %d' % (self.clear_num * 100))[0])
-        font_height_s = int(font_3.size('Score: %d' % (self.clear_num * 100))[1])
+        font_width_s = int(font_3.size('Score: %d' %
+                           (self.clear_num * 100))[0])
+        font_height_s = int(font_3.size('Score: %d' %
+                            (self.clear_num * 100))[1])
         font_x_s = bg_cor1[0] + (bg_width - font_width_s) / 2
         font_y_s = font_y + font_height_s + 25
         # The title and score will show in the certain position.
         game_text(screen, font_2, font_x, font_y, "Score", (104, 149, 191))
-        game_text(screen, font_3, font_x_s, font_y_s + 2, 'Score: %d' % (self.clear_num * 100), (178, 34, 34))
+        game_text(screen, font_3, font_x_s, font_y_s + 2, 'Score: %d' %
+                  (self.clear_num * 100), (178, 34, 34))
 
     def draw_block(self, cell_size, line, screen):
         '''
@@ -784,10 +789,14 @@ class Blocks(object):
         if self.falling:
             for sq in self.block:
                 # Calculate the coordinate of four corner of each square grid
-                line_corn1 = (50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
-                line_corn2 = (50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
-                line_corn3 = (50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
-                line_corn4 = (50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
+                line_corn1 = (
+                    50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
+                line_corn2 = (
+                    50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
+                line_corn3 = (
+                    50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
+                line_corn4 = (
+                    50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
                 # The color fulfill will inside the line-drawn outline.
                 corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
                 # Draw the outlines and draw squares for filling corresponding color.
@@ -795,13 +804,18 @@ class Blocks(object):
                 pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
                 pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
                 pygame.draw.line(screen, (0, 0, 0), line_corn4, line_corn1)
-                pygame.draw.rect(screen, self.color, pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
+                pygame.draw.rect(screen, self.color, pygame.Rect(
+                    corn1[0], corn1[1], cell_size, cell_size))
             for pot in self.done_area:
                 # Calculate the coordinate of four corner of each square grid
-                line_corn1 = (50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
-                line_corn2 = (50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
-                line_corn3 = (50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 3) * (cell_size + line))
-                line_corn4 = (50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
+                line_corn1 = (
+                    50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
+                line_corn2 = (
+                    50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
+                line_corn3 = (
+                    50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 3) * (cell_size + line))
+                line_corn4 = (
+                    50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
                 # The color fulfill will inside the line-drawn outline.
                 corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
                 # Draw the outlines and draw squares for filling corresponding color.

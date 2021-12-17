@@ -185,27 +185,37 @@ def Home_page():
         '''
         if x_1 < mouse[0] < x_1 + w_1 and y_1 < mouse[1] < y_1 + h_1:
             # larger and dark blue button
-            game_text(screen, font_level_large, x_1, y_1, "Level 1", (56, 82, 132))
+            game_text(screen, font_level_large, x_1,
+                      y_1, "Level 1", (56, 82, 132))
         else:
             # smaller and light blue button
-            game_text(screen, font_level_small, x_1, y_1, "Level 1", (90, 167, 167))
+            game_text(screen, font_level_small, x_1,
+                      y_1, "Level 1", (90, 167, 167))
         if x_2 < mouse[0] < x_2 + w_2 and y_2 < mouse[1] < y_2 + h_2:
             # Same with the "Level 1" button
-            game_text(screen, font_level_large, x_2, y_2, "Level 2", (56, 82, 132))
+            game_text(screen, font_level_large, x_2,
+                      y_2, "Level 2", (56, 82, 132))
         else:
-            game_text(screen, font_level_small, x_2, y_2, "Level 2", (90, 167, 167))
+            game_text(screen, font_level_small, x_2,
+                      y_2, "Level 2", (90, 167, 167))
         if x_3 < mouse[0] < x_3 + w_3 and y_3 < mouse[1] < y_3 + h_3:
-            game_text(screen, font_level_large, x_3, y_3, "Level 3", (56, 82, 132))
+            game_text(screen, font_level_large, x_3,
+                      y_3, "Level 3", (56, 82, 132))
         else:
-            game_text(screen, font_level_small, x_3, y_3, "Level 3", (90, 167, 167))
+            game_text(screen, font_level_small, x_3,
+                      y_3, "Level 3", (90, 167, 167))
         if x_ai < mouse[0] < x_ai + w_ai and y_ai < mouse[1] < y_ai + h_ai:
-            game_text(screen, font_level_large, x_ai, y_ai, "AI Tetris", (56, 82, 132))
+            game_text(screen, font_level_large, x_ai,
+                      y_ai, "AI Tetris", (56, 82, 132))
         else:
-            game_text(screen, font_level_small, x_ai, y_ai, "AI Tetris", (90, 167, 167))
+            game_text(screen, font_level_small, x_ai,
+                      y_ai, "AI Tetris", (90, 167, 167))
         if x_q < mouse[0] < x_q + w_q and y_q < mouse[1] < y_q + h_q:
-            game_text(screen, font_level_large, x_q, y_q, "Quit", (56, 82, 132))
+            game_text(screen, font_level_large, x_q,
+                      y_q, "Quit", (56, 82, 132))
         else:
-            game_text(screen, font_level_small, x_q, y_q, "Quit", (90, 167, 167))
+            game_text(screen, font_level_small, x_q,
+                      y_q, "Quit", (90, 167, 167))
         pygame.display.update()
 
 
@@ -241,7 +251,8 @@ def display_screen(screen):
     # Fill the background with a single color
     screen.fill((252, 230, 201))
     # Draw the background of playing area board
-    pygame.draw.rect(screen, (255, 250, 250), pygame.Rect(50, 100, board_width, board_height))
+    pygame.draw.rect(screen, (255, 250, 250), pygame.Rect(
+        50, 100, board_width, board_height))
     # Draw all the column and row lines to generate grid board for playing tetris
     for x in range(columns + 1):
         pygame.draw.line(screen, (0, 0, 0), (50 + x * (cell_size + line), 100),
@@ -254,7 +265,8 @@ def display_screen(screen):
     font_1 = pygame.font.SysFont('Arial', 12)
     font_width = int(font_1.size("Press SPACE to pause the game")[0])
     font_height = int(font_1.size("Press SPACE to pause the game")[1])
-    game_text(screen, font_1, 318, 600, "Press SPACE to pause the game", (226, 90, 83))
+    game_text(screen, font_1, 318, 600,
+              "Press SPACE to pause the game", (226, 90, 83))
     '''
     bg_cor1 means the background upper left corner of the "Next block" rectangle which is used to show 
     the coming block
@@ -270,7 +282,8 @@ def display_screen(screen):
     # Setting the x and y coordinate of the text "Next Block"
     font_x = bg_cor1[0] + (bg_width - font_width)/2
     font_y = bg_cor1[1] + (bg_height - font_height)/2
-    game_text(screen, font_2, font_x, font_y + 20, "Next Block", (104, 149, 191))
+    game_text(screen, font_2, font_x, font_y +
+              20, "Next Block", (104, 149, 191))
     '''
     Using the button_return function defined before to create a button on the lower right corner of the 
     screen. When player click the return button, the page will jump back to home page
@@ -672,20 +685,26 @@ class Blocks(object):
         bg_width = 5 * (cell_size + line) + line
         bg_height = 7 * (cell_size + line) + line
         # Draw the white rectangle background on the upper right side of the game screen
-        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1], bg_width, bg_height))
+        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(
+            bg_cor1[0], bg_cor1[1], bg_width, bg_height))
         for sq in self.next_block:
             # Draw the lines of the block
-            line_corn1 = (50 + (sq[0] + 13) * (cell_size + line), 100 + (sq[1] + 9) * (cell_size + line))
-            line_corn2 = (50 + (sq[0] + 14) * (cell_size + line), 100 + (sq[1] + 9) * (cell_size + line))
-            line_corn3 = (50 + (sq[0] + 14) * (cell_size + line), 100 + (sq[1] + 10) * (cell_size + line))
-            line_corn4 = (50 + (sq[0] + 13) * (cell_size + line), 100 + (sq[1] + 10) * (cell_size + line))
+            line_corn1 = (50 + (sq[0] + 13) * (cell_size + line),
+                          100 + (sq[1] + 9) * (cell_size + line))
+            line_corn2 = (50 + (sq[0] + 14) * (cell_size + line),
+                          100 + (sq[1] + 9) * (cell_size + line))
+            line_corn3 = (50 + (sq[0] + 14) * (cell_size + line),
+                          100 + (sq[1] + 10) * (cell_size + line))
+            line_corn4 = (50 + (sq[0] + 13) * (cell_size + line),
+                          100 + (sq[1] + 10) * (cell_size + line))
             corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
             # Fill all the square grids with corresponding color
             pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
             pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
             pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
             pygame.draw.line(screen, (0, 0, 0), line_corn4, line_corn1)
-            pygame.draw.rect(screen, self.next_color, pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
+            pygame.draw.rect(screen, self.next_color, pygame.Rect(
+                corn1[0], corn1[1], cell_size, cell_size))
 
     def create_new_block(self):
         '''
@@ -843,7 +862,8 @@ class Blocks(object):
         bg_width = 5 * (cell_size + line) + line
         bg_height = 2 * (cell_size + line) + line
         # Draw the white rectangle background on the upper right side of the game screen
-        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(bg_cor1[0], bg_cor1[1] + 55, bg_width, bg_height))
+        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(
+            bg_cor1[0], bg_cor1[1] + 55, bg_width, bg_height))
         # Set the font style and size of the score title and score number
         font_2 = pygame.font.SysFont('Arial', 20)
         font_3 = pygame.font.SysFont('Cambria Math', 24)
@@ -852,13 +872,16 @@ class Blocks(object):
         font_height = int(font_2.size("Score")[1])
         font_x = bg_cor1[0] + (bg_width - font_width) / 2
         font_y = bg_cor1[1] + 30
-        font_width_s = int(font_3.size('Score: %d' % (self.clear_num * 100))[0])
-        font_height_s = int(font_3.size('Score: %d' % (self.clear_num * 100))[1])
+        font_width_s = int(font_3.size('Score: %d' %
+                           (self.clear_num * 100))[0])
+        font_height_s = int(font_3.size('Score: %d' %
+                            (self.clear_num * 100))[1])
         font_x_s = bg_cor1[0] + (bg_width - font_width_s) / 2
         font_y_s = font_y + font_height_s + 25
         # The title and score will show in the certain position.
         game_text(screen, font_2, font_x, font_y, "Score", (104, 149, 191))
-        game_text(screen, font_3, font_x_s, font_y_s + 2, 'Score: %d' % (self.clear_num * 100), (178, 34, 34))
+        game_text(screen, font_3, font_x_s, font_y_s + 2, 'Score: %d' %
+                  (self.clear_num * 100), (178, 34, 34))
 
     def draw_block(self, cell_size, line, screen):
         '''
@@ -881,24 +904,33 @@ class Blocks(object):
         if self.falling:
             for sq in self.block:
                 # Calculate the coordinate of four corner of each square grid
-                line_corn1 = (50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
-                line_corn2 = (50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
-                line_corn3 = (50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
-                line_corn4 = (50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
+                line_corn1 = (
+                    50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
+                line_corn2 = (
+                    50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 2) * (cell_size + line))
+                line_corn3 = (
+                    50 + (sq[0] + 5) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
+                line_corn4 = (
+                    50 + (sq[0] + 4) * (cell_size + line), 100 + (sq[1] + 3) * (cell_size + line))
                 # The color fulfill will inside the line-drawn outline.
                 corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
                 # Draw the outlines and draw squares for filling corresponding color.
                 pygame.draw.line(screen, (0, 0, 0), line_corn1, line_corn2)
-                pygame.draw.line(screen, (0, 0, 0), line_corn2,line_corn3)
+                pygame.draw.line(screen, (0, 0, 0), line_corn2, line_corn3)
                 pygame.draw.line(screen, (0, 0, 0), line_corn3, line_corn4)
                 pygame.draw.line(screen, (0, 0, 0), line_corn4, line_corn1)
-                pygame.draw.rect(screen, self.color, pygame.Rect(corn1[0], corn1[1], cell_size, cell_size))
+                pygame.draw.rect(screen, self.color, pygame.Rect(
+                    corn1[0], corn1[1], cell_size, cell_size))
             for pot in self.done_area:
                 # Calculate the coordinate of four corner of each square grid
-                line_corn1 = (50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
-                line_corn2 = (50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
-                line_corn3 = (50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 3) * (cell_size + line))
-                line_corn4 = (50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
+                line_corn1 = (
+                    50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
+                line_corn2 = (
+                    50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
+                line_corn3 = (
+                    50 + (pot[0] + 5) * (cell_size + line), 100 + (pot[1] + 3) * (cell_size + line))
+                line_corn4 = (
+                    50 + (pot[0] + 4) * (cell_size + line), 100 + (pot[1] + 2) * (cell_size + line))
                 # The color fulfill will inside the line-drawn outline.
                 corn1 = (line_corn1[0] + 1, line_corn1[1] + 1)
                 # Draw the outlines and draw squares for filling corresponding color.
@@ -1030,7 +1062,8 @@ def level_1():
             restart_font = pygame.font.Font(None, 40)
             black = (0, 0, 0)
             game_text(screen, over_font, 75, 250, "Game Over", black)
-            game_text(screen, restart_font, 75, 375, "Press Enter to restart game", (226, 90, 83))
+            game_text(screen, restart_font, 75, 375,
+                      "Press Enter to restart game", (226, 90, 83))
         pygame.display.update()
         # If the game id paused, the time control condition will always keeps the same with real time.
         # So that the block will not move with real time passing during the pause time.
@@ -1134,7 +1167,8 @@ def level_2():
             restart_font = pygame.font.Font(None, 40)
             black = (0, 0, 0)
             game_text(screen, over_font, 75, 250, "Game Over", black)
-            game_text(screen, restart_font, 75, 375, "Press Enter to restart game", (25, 25, 112))
+            game_text(screen, restart_font, 75, 375,
+                      "Press Enter to restart game", (25, 25, 112))
         pygame.display.update()
         if pause:
             time = pygame.time.get_ticks()
@@ -1237,7 +1271,8 @@ def level_3():
             restart_font = pygame.font.Font(None, 40)
             black = (0, 0, 0)
             game_text(screen, over_font, 75, 250, "Game Over", black)
-            game_text(screen, restart_font, 75, 375, "Press Enter to restart game", (25, 25, 112))
+            game_text(screen, restart_font, 75, 375,
+                      "Press Enter to restart game", (25, 25, 112))
         pygame.display.update()
         if pause:
             time = pygame.time.get_ticks()
@@ -1249,11 +1284,3 @@ def level_3():
 
 if __name__ == "__main__":
     Home_page()
-
-
-
-
-
-
-
-
