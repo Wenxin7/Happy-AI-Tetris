@@ -30,8 +30,8 @@ reward = [[(0, -3)]]
 blocks = [T, Z, S, I, L, J, O]
 
 # Define the color
-colors = [(174, 99, 120), (19, 131, 194), (253, 143, 82), (148, 180, 71), (185, 194, 227), (196, 128, 98),
-          (240, 166, 179)]
+colors = [(174, 99, 120), (19, 131, 194), (253, 143, 82), (148, 180, 71),
+          (185, 194, 227), (196, 128, 98), (240, 166, 179)]
 
 # Define all the parameters of the game board
 # The size of small square is 25 x 25
@@ -994,11 +994,11 @@ def level_1():
                         block = Block[0]
                         block_shape = Block[1]
                         block_id = Block[2]
-                        screen_block = Blocks(block, block_shape, block_id)
+                        screen_block1 = Blocks(block, block_shape, block_id)
                         # After restarting the game, the done_area and color list need to be reset.
-                        screen_block.done_area = []
-                        screen_block.ex_color = []
-                        screen_block.create_next()
+                        screen_block1.done_area = []
+                        screen_block1.ex_color = []
+                        screen_block1.create_next()
                         game = 1
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 '''
@@ -1106,10 +1106,10 @@ def level_2():
                         block = Block[0]
                         block_shape = Block[1]
                         block_id = Block[2]
-                        screen_block = Blocks(block, block_shape, block_id)
-                        screen_block.done_area = []
-                        screen_block.ex_color = []
-                        screen_block.create_next()
+                        screen_block2 = Blocks(block, block_shape, block_id)
+                        screen_block2.done_area = []
+                        screen_block2.ex_color = []
+                        screen_block2.create_next()
                         game = 1
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if x < mouse[0] < x + w and y < mouse[1] < y + h:
@@ -1127,7 +1127,8 @@ def level_2():
         In level 2, For every 5 rows of blocks the player removes, 
         the block's fall speed increases by 50 milliseconds until the fastest speed.
         '''
-        if screen_block2.clear_num % 5 == 0 and screen_block2.clear_num != 0 and screen_block2.clear_num <= 15:
+        if (screen_block2.clear_num * 1000) % 5000 == 0 and screen_block2.clear_num != 0 \
+                and screen_block2.clear_num <= 15:
             move_time -= 100
         if game == 2:
             over_font = pygame.font.Font(None, 60)
@@ -1207,10 +1208,10 @@ def level_3():
                         block = Block[0]
                         block_shape = Block[1]
                         block_id = Block[2]
-                        screen_block = Blocks(block, block_shape, block_id)
-                        screen_block.done_area = []
-                        screen_block.ex_color = []
-                        screen_block.create_next()
+                        screen_block3 = Blocks(block, block_shape, block_id)
+                        screen_block3.done_area = []
+                        screen_block3.ex_color = []
+                        screen_block3.create_next()
                         game = 1
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if x < mouse[0] < x + w and y < mouse[1] < y + h:
